@@ -57,7 +57,7 @@ export default function CustomDialog({ config }: CustomDialogProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 animate-fade-in"
       onClick={handleCancel}
     >
       <div 

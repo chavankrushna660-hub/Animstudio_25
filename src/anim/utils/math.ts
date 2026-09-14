@@ -805,7 +805,7 @@ export function route360Updates(
   return result;
 }
 
-// 🌟 3D Wire Sculpting Helper Functions
+//  3D Wire Sculpting Helper Functions
 export function resamplePointsBySpacing(points: Point[], targetSpacing: number = 10): Point[] {
   if (!points || points.length < 2) return points ? [...points] : [];
   const resampled: Point[] = [points[0]];

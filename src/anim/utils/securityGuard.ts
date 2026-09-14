@@ -94,11 +94,11 @@ export function runSecurityShield() {
 
   // 1. Add global error handlers for uncaught exceptions and unhandled promise rejections
   window.addEventListener('error', (event) => {
-    console.error("🛡️ App Global Error Captured:", event.error || event.message);
+    console.error(" App Global Error Captured:", event.error || event.message);
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    console.error("🛡️ App Unhandled Promise Rejection Captured:", event.reason);
+    console.error(" App Unhandled Promise Rejection Captured:", event.reason);
   });
 }
 

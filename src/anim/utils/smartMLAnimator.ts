@@ -1,7 +1,7 @@
 import { Point, VectorObject, BezierAnchor } from '../types';
 
 /**
- * 🌟 Smart ML Animation & Vector Geometry Engine
+ *  Smart ML Animation & Vector Geometry Engine
  * - Predictive Stroke Stabilizer & Curvature Inferrer
  * - Geometric Shape Recognizer (Circle, Rect, Triangle, Star, Arrow)
  * - 2D Spatial Hash Grid (Ultra-Fast O(1) hit testing & indexing for 1000k+ assets)
@@ -18,7 +18,7 @@ export interface DetectedShape {
   bounds: { minX: number; minY: number; maxX: number; maxY: number; width: number; height: number };
 }
 
-// 🧠 1. ML Stroke Stabilizer & Curvature Inferrer
+//  1. ML Stroke Stabilizer & Curvature Inferrer
 export function stabilizeStrokePoints(
   rawPoints: Point[],
   strength: number = 0.5,
@@ -80,7 +80,7 @@ export function stabilizeStrokePoints(
   }
 }
 
-// 🧠 2. ML Shape Recognizer
+//  2. ML Shape Recognizer
 export function recognizeGeometricShape(points: Point[]): DetectedShape | null {
   try {
     if (!points || points.length < 5) return null;
@@ -183,7 +183,7 @@ export function recognizeGeometricShape(points: Point[]): DetectedShape | null {
   }
 }
 
-// 🚀 3. Ultra-Fast 2D Spatial Hash Grid for 1000k+ Assets
+//  3. Ultra-Fast 2D Spatial Hash Grid for 1000k+ Assets
 export class SpatialHashGrid {
   private cellSize: number;
   private grid: Map<string, Set<string>>;
@@ -253,7 +253,7 @@ export class SpatialHashGrid {
   }
 }
 
-// ✂️ 4. Real Vector Eraser (Splits & Trims True Vector Paths)
+//  4. Real Vector Eraser (Splits & Trims True Vector Paths)
 export function realVectorErase(
   points: Point[],
   eraserCenter: Point,
@@ -325,7 +325,7 @@ export function realVectorErase(
   }
 }
 
-// 🗡️ 5. Real Vector Knife Slicing with Separation Gap
+//  5. Real Vector Knife Slicing with Separation Gap
 export function realVectorKnifeCut(
   originalPoints: Point[],
   knifeStart: Point,

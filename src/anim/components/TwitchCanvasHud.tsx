@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Sparkles, 
+  Crosshair, 
   Move, 
   RotateCw, 
   Maximize2, 
@@ -210,7 +210,7 @@ export default function TwitchCanvasHud({
     <div
       ref={hudContainerRef}
       style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
-      className="absolute z-50 w-72 bg-neutral-950/95 backdrop-blur-xl border border-neutral-800/90 rounded-2xl shadow-2xl shadow-black/80 text-neutral-200 select-none"
+      className="absolute z-50 w-72 bg-neutral-950/95 border border-neutral-800/90 rounded-2xl shadow-2xl shadow-black/80 text-neutral-200 select-none"
     >
       {/* Draggable Header */}
       <div
@@ -220,8 +220,8 @@ export default function TwitchCanvasHud({
         className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-neutral-900 to-neutral-950 border-b border-neutral-800 rounded-t-2xl cursor-grab active:cursor-grabbing"
       >
         <div className="flex items-center gap-1.5 pointer-events-none">
-          <div className="w-4 h-4 rounded-md bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-            <Sparkles className="w-2.5 h-2.5" />
+          <div className="w-4 h-4 rounded-md bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-300">
+            <Crosshair className="w-2.5 h-2.5" />
           </div>
           <span className="text-[11px] font-black uppercase tracking-wider text-amber-400">
             Twitch Transform HUD

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { 
   Scissors, 
-  Sparkles, 
   Box, 
   Layers, 
   Eye, 
@@ -67,7 +66,7 @@ export default function PNGDeepEditBar({
 
   const containerClasses = inline
     ? "bg-neutral-950/90 p-3 rounded-2xl border border-amber-500/30 text-white flex flex-col gap-2.5 w-full max-w-full overflow-hidden shadow-xl shrink-0"
-    : "absolute bottom-16 left-1/2 -translate-x-1/2 bg-neutral-900/95 backdrop-blur-md border border-amber-500/30 text-white rounded-2xl shadow-2xl p-3 z-50 flex flex-col gap-3 max-w-xl w-full pointer-events-auto overflow-hidden";
+    : "absolute bottom-16 left-1/2 -translate-x-1/2 bg-neutral-900/95 border border-amber-500/30 text-white rounded-2xl shadow-2xl p-3 z-50 flex flex-col gap-3 max-w-xl w-full pointer-events-auto overflow-hidden";
 
   return (
     <div className={containerClasses}>

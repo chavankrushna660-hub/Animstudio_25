@@ -13,7 +13,7 @@ import {
   Box, 
   CheckCircle2, 
   AlertCircle,
-  Sparkles,
+  AlertTriangle,
   Download,
   Upload
 } from 'lucide-react';
@@ -191,7 +191,7 @@ export default function SavedAnimationsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-8 animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 sm:p-8 animate-fade-in">
       <div className="bg-neutral-900 border border-neutral-800 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[88vh] max-h-[88vh]">
         
         {/* Header */}
@@ -204,9 +204,6 @@ export default function SavedAnimationsModal({
               <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-wider flex items-center gap-2">
                 Saved Animations & Drawings Database
               </h2>
-              <p className="text-xs sm:text-sm text-neutral-400 font-medium mt-0.5">
-                Store up to 10 full multi-frame animation projects with layers, bones, and meshes.
-              </p>
             </div>
           </div>
 
@@ -315,11 +312,8 @@ export default function SavedAnimationsModal({
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-4 scrollbar-thin">
           {savedList.length === 0 ? (
             <div className="py-20 text-center text-neutral-500 space-y-3">
-              <Film className="w-14 h-14 mx-auto text-neutral-700 animate-pulse" />
+              <Film className="w-14 h-14 mx-auto text-neutral-700" />
               <p className="text-sm font-bold text-neutral-300">No saved animations in database yet</p>
-              <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                Save your current canvas project above to store up to 10 full multi-frame animation projects!
-              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3.5">

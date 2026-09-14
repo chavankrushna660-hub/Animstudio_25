@@ -2,7 +2,7 @@
 import { Point, VectorObject } from '../types';
 
 /**
- * 🏗️ PART 1: 3D DEPTH LAYER SYSTEM
+ *  PART 1: 3D DEPTH LAYER SYSTEM
  * Pure Native Implementation for Z-Depth, Parallax, DOF Blur, and Atmospheric Perspective
  */
 
@@ -83,7 +83,7 @@ export function sortObjectsByZDepth<T extends { z?: number; transform3D?: { z?: 
 }
 
 /**
- * ⚡ PART 2: ADVANCED OPTIMIZATION (10,000+ Objects)
+ *  PART 2: ADVANCED OPTIMIZATION (10,000+ Objects)
  */
 
 /**

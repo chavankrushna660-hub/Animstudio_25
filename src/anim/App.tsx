@@ -11,7 +11,7 @@ import {
   Plus, 
   Settings, 
   Folder,
-  Sparkles,
+  Activity,
   Combine,
   GitPullRequest,
   Trash2,
@@ -635,6 +635,8 @@ export default function App() {
   const [lassoMode, setLassoMode] = useState<'freehand' | 'pen'>('freehand');
   const [penLassoPoints, setPenLassoPoints] = useState<Point[]>([]);
   const [fillToolColor, setFillToolColor] = useState<string>('#4CAF50');
+  const [fillSubMode, setFillSubMode] = useState<'whole' | 'part' | 'drag_erase'>('whole');
+  const [fillEraseRadius, setFillEraseRadius] = useState<number>(25);
   const [isFillEraseMode, setIsFillEraseMode] = useState<boolean>(false);
   const [ignoreInnerDrawings, setIgnoreInnerDrawings] = useState<boolean>(true);
   const [hideLassoSelection, setHideLassoSelection] = useState<boolean>(false);
@@ -3924,22 +3926,24 @@ export default function App() {
 
   const isPortrait = windowSize.height > windowSize.width;
   const isMobile = windowSize.width < 1200 || isPortrait;
-  const targetWidth = isPortrait ? 850 : 1280;
-  const scale = isMobile ? windowSize.width / targetWidth : 1;
+  // Very slight overall app scale boost as requested ("increase size of app scale the entire app, very little bit, not every button and tools one by one first entire app scale it")
+  const APP_SCALE_FACTOR = 1.04;
+  const targetWidth = isPortrait ? 815 : 1230;
+  const scale = (isMobile ? (windowSize.width / targetWidth) : 1) * APP_SCALE_FACTOR;
 
   if (typeof window !== 'undefined') {
     (window as any).__appScale = scale;
   }
 
-  const containerStyle: React.CSSProperties = isMobile ? {
-    width: `${targetWidth}px`,
+  const containerStyle: React.CSSProperties = {
+    width: `${(isMobile ? targetWidth : windowSize.width) / APP_SCALE_FACTOR}px`,
     height: `${windowSize.height / scale}px`,
     transform: `scale(${scale})`,
     transformOrigin: 'top left',
     position: 'absolute',
     left: 0,
     top: 0,
-  } : {};
+  };
 
   const renderAdBox = (item: AdItem, slotNum: number, align: 'top' | 'bottom' = 'bottom') => {
     return (
@@ -4043,30 +4047,27 @@ export default function App() {
             type="button"
             id="topbar-make-single-btn"
             onClick={handleTopBarMakeSingle}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 shadow-lg border-2 ${
-              (activeTool === 'lasso' || lassoPoints.length > 0)
-                ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-amber-400 text-neutral-950 border-emerald-300 ring-2 ring-emerald-400/50 shadow-emerald-500/20 animate-pulse'
-                : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/50'
-            }`}
-            title="Convert lasso area or selected strokes into a single continuous drawing object (3D ready)"
+            className="btn-dark-white flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 shadow-md border-2 bg-yellow-200 hover:bg-yellow-100 active:bg-yellow-300 text-neutral-950 border-yellow-300"
+            title="Make Single Drawing"
           >
-            <Combine className="w-5 h-5 stroke-[2.6] shrink-0" />
-            <span className="inline uppercase font-black tracking-wide">MAKE SINGLE DRAWING</span>
+            <Combine className="w-5 h-5 stroke-[2.6] shrink-0 text-neutral-950" />
+            <span className="inline uppercase font-black tracking-wide text-neutral-950">MAKE SINGLE DRAWING</span>
           </button>
 
           <button
+            id="topbar-rig-sample-btn"
             onClick={addSampleCharacter}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 font-black text-xs sm:text-sm hover:shadow-lg hover:shadow-amber-500/20 transition-all cursor-pointer shrink-0 border-2 border-amber-300"
+            className="btn-dark-white flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-900 font-black text-xs sm:text-sm hover:shadow-md transition-all cursor-pointer shrink-0 border-2 border-neutral-300"
             title="Rig Sample Character"
           >
-            <Sparkles className="w-5 h-5 stroke-[2.6] fill-current shrink-0" />
-            <span className="inline uppercase tracking-wide">RIG SAMPLE CHARACTER</span>
+            <UserCheck className="w-5 h-5 stroke-[2.6] shrink-0 text-neutral-900" />
+            <span className="inline uppercase tracking-wide text-neutral-900">RIG SAMPLE CHARACTER</span>
           </button>
 
           <button
             onClick={clearCanvas}
             className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-600 border-2 border-rose-500/30 hover:border-rose-500 text-rose-400 hover:text-white font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0"
-            title="Clear entire canvas, drawings, bones and timelines"
+            title="Clear Canvas"
           >
             <Trash2 className="w-4.5 h-4.5 stroke-[2.6] shrink-0" />
             <span className="inline uppercase">CLEAR</span>
@@ -4080,10 +4081,10 @@ export default function App() {
             onClick={() => setLeftOpen(!leftOpen)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer border-2 shrink-0 shadow-md ${
               leftOpen 
-                ? 'bg-amber-500 text-neutral-950 border-amber-400' 
-                : 'bg-neutral-850 hover:bg-neutral-800 text-neutral-200 border-neutral-700 hover:border-amber-400/80'
+                ? 'bg-neutral-100 text-neutral-950 border-neutral-300' 
+                : 'bg-neutral-850 hover:bg-neutral-800 text-neutral-200 border-neutral-700 hover:border-neutral-500'
             }`}
-            title={leftOpen ? "Close Layers Hierarchy Panel" : "Open Layers Hierarchy Panel"}
+            title="Layers Panel"
           >
             <Folder className="w-4.5 h-4.5 stroke-[2.6]" />
             <span className="uppercase tracking-wider">LAYERS</span>
@@ -4094,10 +4095,10 @@ export default function App() {
             onClick={() => handleSetRightOpen(!rightOpen)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer border-2 shrink-0 shadow-md ${
               rightOpen 
-                ? 'bg-amber-500 text-neutral-950 border-amber-400' 
-                : 'bg-neutral-850 hover:bg-neutral-800 text-neutral-200 border-neutral-700 hover:border-amber-400/80'
+                ? 'bg-neutral-100 text-neutral-950 border-neutral-300' 
+                : 'bg-neutral-850 hover:bg-neutral-800 text-neutral-200 border-neutral-700 hover:border-neutral-500'
             }`}
-            title={rightOpen ? "Close Properties Panel" : "Open Properties Panel"}
+            title="Properties Panel"
           >
             <Settings className="w-4.5 h-4.5 stroke-[2.6]" />
             <span className="uppercase tracking-wider">PROPS</span>
@@ -4133,10 +4134,10 @@ export default function App() {
             onClick={toggleTheme}
             className={`p-2 rounded-xl border-2 transition-all shrink-0 cursor-pointer shadow ${
               theme === 'dark' 
-                ? 'bg-neutral-850 hover:bg-neutral-800 text-amber-400 border-neutral-700' 
+                ? 'bg-neutral-850 hover:bg-neutral-800 text-neutral-200 border-neutral-700' 
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
             }`}
-            title={theme === 'dark' ? "Switch to Light Studio Theme" : "Switch to Dark Studio Theme"}
+            title="Theme"
           >
             {theme === 'dark' ? <Sun className="w-5 h-5 stroke-[2.6]" /> : <Moon className="w-5 h-5 stroke-[2.6]" />}
           </button>
@@ -4148,24 +4149,25 @@ export default function App() {
             <button
               onClick={stopRecording}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs sm:text-sm animate-pulse transition-all cursor-pointer shrink-0 shadow-lg border-2 border-rose-400"
-              title="Stop Recording Canvas & Export directly to Gallery / Device"
+              title="Stop & Export"
             >
               <span className="w-3 h-3 rounded-full bg-white animate-ping shrink-0" />
               <span className="inline uppercase tracking-wider font-black">STOP & EXPORT</span>
             </button>
           ) : (
             <button
+              id="btn-gif-export"
               onClick={() => {
                 setCurrentFrameIndex(0);
                 setTimeout(() => {
                   startRecording();
                 }, 50);
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 shadow-lg border-2 border-emerald-400"
-              title="Record & Export Canvas Animation directly to Device / Gallery"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-200 hover:bg-yellow-100 active:bg-yellow-300 text-neutral-950 font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 shadow-md border-2 border-yellow-300"
+              title="GIF Export"
             >
-              <Download className="w-5 h-5 stroke-[2.8] shrink-0" />
-              <span className="inline uppercase tracking-wider font-black">GIF EXPORT</span>
+              <Download className="w-5 h-5 stroke-[2.8] shrink-0 text-neutral-950" />
+              <span className="inline uppercase tracking-wider font-black text-neutral-950">GIF EXPORT</span>
             </button>
           )}
 
@@ -4229,7 +4231,7 @@ export default function App() {
 
                 {/* Database Animation Section */}
                 <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800/60 space-y-2.5">
-                  <span className="text-[10px] text-amber-400 font-black uppercase tracking-wider block">💾 Database Storage</span>
+                  <span className="text-[10px] text-amber-400 font-black uppercase tracking-wider block">Database Storage</span>
                   
                   {savedRecord ? (
                     <div className="space-y-2">
@@ -4242,7 +4244,7 @@ export default function App() {
                             <span>Saved: {new Date(savedRecord.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                           <div className="text-[9px] text-amber-500 font-black mt-1">
-                            ⚠️ Auto-expires in {Math.max(0, Math.ceil((24 * 60 * 60 * 1000 - (Date.now() - savedRecord.savedAt)) / (60 * 60 * 1000)))} hours
+                            Auto-expires in {Math.max(0, Math.ceil((24 * 60 * 60 * 1000 - (Date.now() - savedRecord.savedAt)) / (60 * 60 * 1000)))} hours
                           </div>
                         </div>
                       </div>
@@ -4264,8 +4266,8 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      <p className="text-[10px] text-neutral-500 leading-relaxed">
-                        No animation currently saved in your database slot. Saving stores your objects, layers, and timelines for exactly 1 day.
+                      <p className="text-[10px] text-neutral-500 leading-relaxed font-bold">
+                        No animation currently saved in your database slot.
                       </p>
                     </div>
                   )}
@@ -4343,6 +4345,10 @@ export default function App() {
           ignoreInnerDrawings={ignoreInnerDrawings}
           setIgnoreInnerDrawings={setIgnoreInnerDrawings}
           applyColorFillToSelected={applyColorFillToSelected}
+          fillSubMode={fillSubMode}
+          setFillSubMode={setFillSubMode}
+          fillEraseRadius={fillEraseRadius}
+          setFillEraseRadius={setFillEraseRadius}
           isFillEraseMode={isFillEraseMode}
           setIsFillEraseMode={setIsFillEraseMode}
           removeColorFillFromSelected={removeColorFillFromSelected}
@@ -4404,6 +4410,10 @@ export default function App() {
           adaptiveSubdivisionPoints={adaptiveSubdivisionPoints}
           fillToolColor={fillToolColor}
           setFillToolColor={setFillToolColor}
+          fillSubMode={fillSubMode}
+          setFillSubMode={setFillSubMode}
+          fillEraseRadius={fillEraseRadius}
+          setFillEraseRadius={setFillEraseRadius}
           isFillEraseMode={isFillEraseMode}
           setIsFillEraseMode={setIsFillEraseMode}
           ignoreInnerDrawings={ignoreInnerDrawings}
@@ -4749,9 +4759,9 @@ export default function App() {
       {shortcutHint && (
         <div 
           id="shortcut-hud-hint"
-          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 border border-amber-500/30 text-amber-400 font-extrabold px-6 py-2.5 rounded-full shadow-[0_0_25px_rgba(245,158,11,0.25)] text-xs tracking-wider uppercase animate-fade-in pointer-events-none backdrop-blur flex items-center gap-2"
+          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 border border-amber-500/30 text-amber-400 font-extrabold px-6 py-2.5 rounded-full shadow-[0_0_25px_rgba(245,158,11,0.25)] text-xs tracking-wider uppercase animate-fade-in pointer-events-none flex items-center gap-2"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+          <Activity className="w-3.5 h-3.5 text-amber-400" />
           <span>{shortcutHint}</span>
         </div>
       )}
@@ -4759,7 +4769,7 @@ export default function App() {
       {isAuthModalOpen && (
         <div 
           id="auth-modal-overlay" 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-8 animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 sm:p-8 animate-fade-in"
         >
           <div className="w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden text-neutral-100 flex flex-col max-h-[90vh]">
             {/* Header */}
@@ -4770,7 +4780,6 @@ export default function App() {
                 </div>
                 <div>
                   <h3 className="font-black uppercase tracking-wider text-base sm:text-lg text-white">Simple Authentication</h3>
-                  <p className="text-xs text-neutral-400 font-medium mt-0.5">Access your private cloud storage and sync animations</p>
                 </div>
               </div>
               <button
@@ -4879,13 +4888,13 @@ export default function App() {
 
       <CustomDialog config={dialogConfig} />
 
-      {/* 🚀 Pure In-App Toast Notification Stack */}
+      {/*  Pure In-App Toast Notification Stack */}
       {toasts.length > 0 && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] flex flex-col items-center gap-2 pointer-events-none px-4 max-w-md w-full">
           {toasts.map((t) => (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border shadow-2xl backdrop-blur-md text-xs font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-2 duration-150 transition-all ${
+              className={`pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border shadow-2xl text-xs font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-2 duration-150 transition-all ${
                 t.type === 'success'
                   ? 'bg-emerald-950/95 border-emerald-500/50 text-emerald-200 shadow-emerald-950/60'
                   : t.type === 'error'

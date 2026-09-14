@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useRef, useState, useEffect } from 'react';
 const EMPTY_ARRAY: any[] = [];
-import { RotateCcw, Sparkles, Feather, ZoomIn, ZoomOut, Maximize2, Activity, GitCommit } from 'lucide-react';
+import { RotateCcw, Feather, ZoomIn, ZoomOut, Maximize2, Activity, GitCommit } from 'lucide-react';
 import { Point, VectorObject, Bone, Pivot, Frame, Transform, RealismSettings, LassoControlPoint, SmartWarpPin, BrushSettings, LiquifyBrushSettings, CurvePathState, FlexCurveState, FlexCurveControlPoint, CustomVectorDeformNode, CustomVectorDeformState, Layer, PointShapeNode, PointShapeState, SculptBrushState, LineEditState, LineEditNode, VSTState, SmartCorrectState, EraserSettings, KnifeSettings, PivotSettings, MLSettings } from '../types';
 import { stabilizeStrokePoints, recognizeGeometricShape, realVectorErase, realVectorKnifeCut, SpatialHashGrid } from '../utils/smartMLAnimator';
 import { calculateCustomVectorDeformedPoints, calculateRigidLinearDeformedPoints } from '../utils/vectorDeform';
@@ -208,7 +208,7 @@ const getWarpedPoint = (p: Point, meshState: any, bounds: any): Point => {
   };
 };
 
-// 🌟 Distance from point to line segment helper
+//  Distance from point to line segment helper
 const pointToSegmentDistance = (p: Point, v: Point, w: Point): number => {
   const l2 = (v.x - w.x) ** 2 + (v.y - w.y) ** 2;
   if (l2 === 0) return distance(p, v);
@@ -220,7 +220,7 @@ const pointToSegmentDistance = (p: Point, v: Point, w: Point): number => {
   });
 };
 
-// 🌟 Distance from point to polygon boundary helper
+//  Distance from point to polygon boundary helper
 const pointToPolygonDistance = (p: Point, polygon: Point[]): number => {
   let minD = Infinity;
   for (let i = 0; i < polygon.length; i++) {
@@ -234,7 +234,7 @@ const pointToPolygonDistance = (p: Point, polygon: Point[]): number => {
   return minD;
 };
 
-// 🌟 Lasso selection deformation point helper with seamless organic boundary welding
+//  Lasso selection deformation point helper with seamless organic boundary welding
 const deformWithLasso = (p: Point, obj: VectorObject): Point => {
   if (
     obj.lassoDeformState && 
@@ -275,7 +275,7 @@ const deformWithLasso = (p: Point, obj: VectorObject): Point => {
   return p;
 };
 
-// 🌟 Lasso Control Points Mesh Shepard's IDW deform helper
+//  Lasso Control Points Mesh Shepard's IDW deform helper
 const deformWithLassoControlPoints = (p: Point, controlPoints: LassoControlPoint[]): Point => {
   if (!controlPoints || controlPoints.length === 0) return p;
 
@@ -474,7 +474,7 @@ const deformWithSmartWarp = (p: Point, smartWarp: any): Point => {
   };
 };
 
-// 🌟 Spline Bezier Evaluation Helpers
+//  Spline Bezier Evaluation Helpers
 const evaluateCubicBezier = (p0: Point, p1: Point, p2: Point, p3: Point, t: number): Point => {
   const mt = 1 - t;
   const mt2 = mt * mt;
@@ -1643,6 +1643,10 @@ interface CanvasAreaProps {
   adaptiveSubdivisionPoints: number;
   fillToolColor?: string;
   setFillToolColor?: (color: string) => void;
+  fillSubMode?: 'whole' | 'part' | 'drag_erase';
+  setFillSubMode?: (val: 'whole' | 'part' | 'drag_erase') => void;
+  fillEraseRadius?: number;
+  setFillEraseRadius?: (r: number) => void;
   isFillEraseMode?: boolean;
   setIsFillEraseMode?: (val: boolean) => void;
   ignoreInnerDrawings?: boolean;
@@ -1808,6 +1812,10 @@ function CanvasArea({
   adaptiveSubdivisionPoints,
   fillToolColor = '#4CAF50',
   setFillToolColor,
+  fillSubMode = 'whole',
+  setFillSubMode,
+  fillEraseRadius = 25,
+  setFillEraseRadius,
   isFillEraseMode = false,
   setIsFillEraseMode,
   ignoreInnerDrawings = true,
@@ -1938,7 +1946,9 @@ function CanvasArea({
   const imagesCacheRef = useRef<{ [url: string]: HTMLImageElement }>({});
   const [, setForceRender] = useState(0);
 
-  // 🌟 Tool states for Cutter, Contour Editor, Master Controller, Peg Hierarchy
+  //  Tool states for Cutter, Contour Editor, Master Controller, Peg Hierarchy
+  const [partFillPoints, setPartFillPoints] = useState<Point[]>([]);
+  const activeFillEraseObjIdRef = useRef<string | null>(null);
   const [cutterPath, setCutterPath] = useState<Point[]>([]);
   const [selectedContourPointIndex, setSelectedContourPointIndex] = useState<number | null>(null);
   const [selectedContourHandle, setSelectedContourHandle] = useState<'anchor' | 'cp1' | 'cp2' | null>(null);
@@ -1949,6 +1959,41 @@ function CanvasArea({
 
   const [tempArtboardW, setTempArtboardW] = useState<string>(artboardW.toString());
   const [tempArtboardH, setTempArtboardH] = useState<string>(artboardH.toString());
+
+  // Zoom & Pan Canvas states (100x zoom capability)
+  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [zoomOffset, setZoomOffset] = useState<Point>({ x: 0, y: 0 });
+  const [isSpacePressed, setIsSpacePressed] = useState<boolean>(false);
+  const isSpacePressedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const handleSpaceKeyDown = (e: KeyboardEvent) => {
+      const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (targetTag === 'input' || targetTag === 'textarea' || (e.target as HTMLElement)?.isContentEditable) {
+        return;
+      }
+      if (e.code === 'Space' || e.key === ' ') {
+        if (!isSpacePressedRef.current) {
+          isSpacePressedRef.current = true;
+          setIsSpacePressed(true);
+        }
+      }
+    };
+
+    const handleSpaceKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' || e.key === ' ') {
+        isSpacePressedRef.current = false;
+        setIsSpacePressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleSpaceKeyDown);
+    window.addEventListener('keyup', handleSpaceKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleSpaceKeyDown);
+      window.removeEventListener('keyup', handleSpaceKeyUp);
+    };
+  }, []);
 
   // Keep temp artboard inputs synced safely when props change
   useEffect(() => {
@@ -2374,6 +2419,20 @@ function CanvasArea({
   };
 
   useEffect(() => {
+    const handleZoomIn = () => zoomIn();
+    const handleZoomOut = () => zoomOut();
+    const handleResetZoom = () => recenterCanvas();
+    window.addEventListener('app-zoom-in', handleZoomIn);
+    window.addEventListener('app-zoom-out', handleZoomOut);
+    window.addEventListener('app-zoom-reset', handleResetZoom);
+    return () => {
+      window.removeEventListener('app-zoom-in', handleZoomIn);
+      window.removeEventListener('app-zoom-out', handleZoomOut);
+      window.removeEventListener('app-zoom-reset', handleResetZoom);
+    };
+  }, [zoomScale, dimensions]);
+
+  useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -2724,41 +2783,6 @@ function CanvasArea({
   // 3D Bone and Vertex dragging states
   const [isDrawing3DBone, setIsDrawing3DBone] = useState(false);
   const [bone3DStartVtxIdx, setBone3DStartVtxIdx] = useState<number | null>(null);
-
-  // Zoom & Pan Canvas states (100x zoom capability)
-  const [zoomScale, setZoomScale] = useState<number>(1);
-  const [zoomOffset, setZoomOffset] = useState<Point>({ x: 0, y: 0 });
-  const [isSpacePressed, setIsSpacePressed] = useState<boolean>(false);
-  const isSpacePressedRef = useRef<boolean>(false);
-
-  useEffect(() => {
-    const handleSpaceKeyDown = (e: KeyboardEvent) => {
-      const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
-      if (targetTag === 'input' || targetTag === 'textarea' || (e.target as HTMLElement)?.isContentEditable) {
-        return;
-      }
-      if (e.code === 'Space' || e.key === ' ') {
-        if (!isSpacePressedRef.current) {
-          isSpacePressedRef.current = true;
-          setIsSpacePressed(true);
-        }
-      }
-    };
-
-    const handleSpaceKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space' || e.key === ' ') {
-        isSpacePressedRef.current = false;
-        setIsSpacePressed(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleSpaceKeyDown);
-    window.addEventListener('keyup', handleSpaceKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleSpaceKeyDown);
-      window.removeEventListener('keyup', handleSpaceKeyUp);
-    };
-  }, []);
 
   // Touch screen multi-touch pinch gesture tracking refs
   const activePointersRef = useRef<{ [id: number]: Point }>({});
@@ -3592,7 +3616,7 @@ function CanvasArea({
       }
     }
 
-    // 🌟 Universal Transform Handles Check across ALL Active Tools (Rotate, Scale, Pivot)
+    //  Universal Transform Handles Check across ALL Active Tools (Rotate, Scale, Pivot)
     if (selectedObjectId && objects[selectedObjectId]) {
       const obj = objects[selectedObjectId];
       const effLayerId = obj.layerId || (layers && layers[0] ? layers[0].id : 'layer_1');
@@ -3784,7 +3808,7 @@ function CanvasArea({
       const localPivot = obj.pivots[0] || { localX: 0, localY: 0 };
       const localClick = worldToLocal(coords, obj.transform, localPivot);
 
-      // 🌟 Maintain persistent baseline geometry on the object itself for zero-accumulation drift & multi-point precision
+      //  Maintain persistent baseline geometry on the object itself for zero-accumulation drift & multi-point precision
       if (!obj.mwpBasePoints || obj.mwpBasePoints.length === 0) {
         obj.mwpBasePoints = obj.points.map(p => ({ ...p }));
         if (obj.subPaths && obj.subPaths.length > 0) {
@@ -3799,7 +3823,7 @@ function CanvasArea({
       }
       const baseline = mwpBasePointsMapRef.current[obj.id];
 
-      // 🌟 Ultra-reliable grab hit threshold (50px)
+      //  Ultra-reliable grab hit threshold (50px)
       const grabThreshold = Math.max(48, 50 / zoomScale);
 
       if (mwpState?.activeMode === 'extrude') {
@@ -3813,7 +3837,7 @@ function CanvasArea({
           return distance(coords, worldPt) <= grabThreshold;
         });
 
-        // 🌟 Check for triple-click / triple-tap or Delete Mode
+        //  Check for triple-click / triple-tap or Delete Mode
         if (clickedPoint) {
           const now = Date.now();
           const prevClicks = (mwpPointClickTimesRef.current[clickedPoint.id] || []).filter(t => now - t < 700);
@@ -3850,7 +3874,7 @@ function CanvasArea({
 
         let targetPoint = clickedPoint;
         if (!targetPoint) {
-          // 🌟 Point MUST be added at the exact local click coordinates where the user clicked!
+          //  Point MUST be added at the exact local click coordinates where the user clicked!
           const ptX = Number(localClick.x.toFixed(2));
           const ptY = Number(localClick.y.toFixed(2));
 
@@ -4292,9 +4316,63 @@ function CanvasArea({
     // 8. Fill Bucket Tool logic
     if (activeTool === 'FIL') {
       try {
-        const isErasingFill = !!isFillEraseMode || fillToolColor === 'transparent';
+        if (fillSubMode === 'part') {
+          setIsDrawing(true);
+          setPartFillPoints([coords]);
+          const visibleObjs = Object.values(objects).filter(o => !o.isHidden && !o.isLocked && o.type !== '360_container');
+          for (let i = visibleObjs.length - 1; i >= 0; i--) {
+            const o = visibleObjs[i];
+            const pivot = o.pivots?.[0] || { localX: 0, localY: 0 };
+            const localClick = worldToLocal(coords, o.transform, pivot);
+            const allPts = (o.points && o.points.length > 0) ? o.points : (o.subPaths ? o.subPaths.flat() : []);
+            if (allPts.length >= 3 && isPointInPolygon(localClick, allPts)) {
+              setSelectedObjectId(o.id);
+              break;
+            }
+          }
+          return;
+        }
 
-        // 🎨 Handle Erase Fill Mode (Unfill drawing or erase custom area flood fill)
+        if (fillSubMode === 'drag_erase' || isFillEraseMode) {
+          setIsDrawing(true);
+          const visibleObjs = Object.values(objects).filter(o => !o.isHidden && !o.isLocked && o.type !== '360_container');
+          let targetObj = (selectedObjectId && objects[selectedObjectId]) ? objects[selectedObjectId] : null;
+          if (!targetObj) {
+            for (let i = visibleObjs.length - 1; i >= 0; i--) {
+              const o = visibleObjs[i];
+              const pivot = o.pivots?.[0] || { localX: 0, localY: 0 };
+              const localClick = worldToLocal(coords, o.transform, pivot);
+              const allPts = (o.points && o.points.length > 0) ? o.points : (o.subPaths ? o.subPaths.flat() : []);
+              if (allPts.length >= 3 && isPointInPolygon(localClick, allPts)) {
+                targetObj = o;
+                setSelectedObjectId(o.id);
+                break;
+              }
+            }
+          }
+          if (targetObj) {
+            activeFillEraseObjIdRef.current = targetObj.id;
+            const pivot = targetObj.pivots?.[0] || { localX: 0, localY: 0 };
+            const localPt = worldToLocal(coords, targetObj.transform, pivot);
+            const newStroke = { points: [localPt], radius: fillEraseRadius ?? 25 };
+            setObjects(prev => {
+              const cur = prev[targetObj!.id];
+              if (!cur) return prev;
+              return {
+                ...prev,
+                [targetObj!.id]: {
+                  ...cur,
+                  fillEraseStrokes: [...(cur.fillEraseStrokes || []), newStroke]
+                }
+              };
+            });
+          }
+          return;
+        }
+
+        const isErasingFill = fillToolColor === 'transparent';
+
+        //  Handle Erase Fill Mode (Unfill drawing or erase custom area flood fill)
         if (isErasingFill) {
           const visibleObjects = Object.values(objects).filter(o => {
             if (o.isHidden || o.isLocked || o.type === '360_container') return false;
@@ -4913,7 +4991,7 @@ function CanvasArea({
         const isExtrudeMode = obj.meshState?.pointExtrudeMode || canvasExtrudeMode;
 
         if (isExtrudeMode && (clickedMptIndex !== -1 || clickedVtxIdx !== -1)) {
-          // ⚡ EXTRUDE NEW POINT / BRANCH MODE ACTIVE!
+          //  EXTRUDE NEW POINT / BRANCH MODE ACTIVE!
           const pivot = obj.pivots[0] || { localX: 0, localY: 0 };
           const cursorLocal = worldToLocal(coords, obj.transform, pivot);
           
@@ -5127,7 +5205,7 @@ function CanvasArea({
       return;
     }
 
-    // 〰️ LIN (Line Shape Edit / Snapped Stroke Deformer) pointer down logic
+    //  LIN (Line Shape Edit / Snapped Stroke Deformer) pointer down logic
     if (activeTool === 'LIN') {
       let targetObj: VectorObject | null = null;
       const hitObj = performHitTest(coords);
@@ -5264,7 +5342,7 @@ function CanvasArea({
       }
     }
 
-    // 🎨 PTS (Point Shape Sculptor) tool pointer down logic
+    //  PTS (Point Shape Sculptor) tool pointer down logic
     if (activeTool === 'PTS') {
       if (!pointShapeState || !setPointShapeState) return;
       const { nodes, mode, selectedNodeId, brushRadius, brushStrength, brushType } = pointShapeState;
@@ -5438,7 +5516,7 @@ function CanvasArea({
       return;
     }
 
-    // 🌟 Wireframe Mode Direct Vertex Point Click Handler
+    //  Wireframe Mode Direct Vertex Point Click Handler
     if (selectedObjectId && objects[selectedObjectId] && objects[selectedObjectId].wireframeMode) {
       const obj = objects[selectedObjectId];
       const pivot = obj.pivots[0] || { localX: 0, localY: 0 };
@@ -5552,7 +5630,7 @@ function CanvasArea({
       return;
     }
 
-    // ✂️ CUTTER Tool pointer down logic
+    //  CUTTER Tool pointer down logic
     if (activeTool === 'CUTTER') {
       setCutterPath([coords]);
       setDragMode('cutter' as any);
@@ -5560,7 +5638,7 @@ function CanvasArea({
       return;
     }
 
-    // 🎯 CONTOUR EDITOR (White Arrow) pointer down logic
+    //  CONTOUR EDITOR (White Arrow) pointer down logic
     if ((activeTool === 'CONTOUR_EDITOR' || activeTool === 'DIRECT_SELECT') && selectedObjectId && objects[selectedObjectId]) {
       const obj = objects[selectedObjectId];
       if (obj.points && obj.points.length > 0) {
@@ -5607,7 +5685,7 @@ function CanvasArea({
       }
     }
 
-    // 🎛️ MASTER CONTROLLER pointer down logic
+    //  MASTER CONTROLLER pointer down logic
     if (activeTool === 'MASTER_CONTROLLER') {
       let clickedWidgetId: string | null = null;
       if (masterControllers && masterControllers.length > 0) {
@@ -5649,7 +5727,7 @@ function CanvasArea({
       }
     }
 
-    // 🦴 HIERARCHY & PEGS pointer down logic
+    //  HIERARCHY & PEGS pointer down logic
     if (activeTool === 'PEG_HIERARCHY') {
       let clickedPegId: string | null = null;
       let minDist = 24 / zoomScale;
@@ -5923,7 +6001,7 @@ function CanvasArea({
       return;
     }
 
-    // 🎨 SCB (Sculpt & Correct Brush) tool pointer down logic
+    //  SCB (Sculpt & Correct Brush) tool pointer down logic
     if (activeTool === 'SCB') {
       const radius = sculptBrushState?.brushRadius || 60;
       const strength = sculptBrushState?.brushStrength || 0.5;
@@ -6023,7 +6101,7 @@ function CanvasArea({
       return;
     }
 
-    // ⚡ TWT (Twitch Point & Sub-Shape Scanner/Deformer) pointer down logic
+    //  TWT (Twitch Point & Sub-Shape Scanner/Deformer) pointer down logic
     if (activeTool === 'TWT' || activeTool === 'twitch') {
       let obj = selectedObjectId && objects[selectedObjectId] ? objects[selectedObjectId] : getOrPrepareActiveObject(coords);
       if (!obj) return;
@@ -6209,7 +6287,7 @@ function CanvasArea({
       return;
     }
 
-    // 🎭 Swap Studio (SWP) Tool Canvas Selection / Unselection Logic
+    //  Swap Studio (SWP) Tool Canvas Selection / Unselection Logic
     if (activeTool === 'SWAP_STUDIO' || activeTool === 'SWP' || activeTool === 'SST') {
       if (selectedObjectId) {
         const obj = objects[selectedObjectId];
@@ -6502,7 +6580,7 @@ function CanvasArea({
       setThrottledCursorPos(coords);
     }
 
-    // ⚡ Twitch Tool Hover Highlight
+    //  Twitch Tool Hover Highlight
     if ((activeTool === 'TWT' || activeTool === 'twitch') && dragMode === 'none' && selectedObjectId && objects[selectedObjectId]) {
       const obj = objects[selectedObjectId];
       if (obj.twitchState && obj.twitchState.shapes && obj.twitchState.shapes.length > 0) {
@@ -6525,7 +6603,7 @@ function CanvasArea({
       }
     }
 
-    // ⚡ MWP Extrude real-time drag (Simultaneous multi-point deformation with subpath support)
+    //  MWP Extrude real-time drag (Simultaneous multi-point deformation with subpath support)
     if (dragMode === 'mwp_extrude_drag' && mwpExtrudeDragRef.current && effectiveSelectedObjectId && objects[effectiveSelectedObjectId]) {
       const obj = objects[effectiveSelectedObjectId];
       const localPivot = obj.pivots?.[0] || { localX: 0, localY: 0 };
@@ -6582,7 +6660,7 @@ function CanvasArea({
       return;
     }
 
-    // ⚡ MWP Transform Boundary Point Drag
+    //  MWP Transform Boundary Point Drag
     if (dragMode === 'mwp_transform_drag' && mwpExtrudeDragRef.current && effectiveSelectedObjectId && objects[effectiveSelectedObjectId]) {
       const obj = objects[effectiveSelectedObjectId];
       const localPivot = obj.pivots?.[0] || { localX: 0, localY: 0 };
@@ -6727,13 +6805,13 @@ function CanvasArea({
 
     // directRigBone dragging handler removed.
 
-    // ✂️ CUTTER dragging handler
+    //  CUTTER dragging handler
     if (dragMode === 'cutter') {
       setCutterPath(prev => [...prev, coords]);
       return;
     }
 
-    // 🎯 CONTOUR EDITOR (White Arrow) handle dragging
+    //  CONTOUR EDITOR (White Arrow) handle dragging
     if (dragMode === 'contour_point' && selectedObjectId && selectedContourPointIndex !== null && objects[selectedObjectId]) {
       const obj = objects[selectedObjectId];
       const pivot = obj.pivots?.[0] || { localX: 0, localY: 0 };
@@ -6756,7 +6834,7 @@ function CanvasArea({
       return;
     }
 
-    // 🎛️ MASTER CONTROLLER dragging handler
+    //  MASTER CONTROLLER dragging handler
     if (dragMode === 'master_controller' && activeMasterWidgetId && masterControllers && onUpdateMasterControllers) {
       const widget = masterControllers.find(w => w.id === activeMasterWidgetId);
       if (widget) {
@@ -6790,7 +6868,7 @@ function CanvasArea({
       return;
     }
 
-    // 🦴 HIERARCHY & PEGS dragging handler
+    //  HIERARCHY & PEGS dragging handler
     if (dragMode === 'peg_node' && activePegId && pegNodes && onUpdatePegNodes) {
       const peg = pegNodes.find(p => p.id === activePegId);
       if (peg) {
@@ -7401,7 +7479,7 @@ function CanvasArea({
       return;
     }
 
-    // ⚡ TWITCH TOOL DRAG HANDLERS
+    //  TWITCH TOOL DRAG HANDLERS
     if (
       (dragMode === ('twitch-edit-grab' as any) ||
        dragMode === ('twitch-transform-drag' as any) ||
@@ -7481,7 +7559,7 @@ function CanvasArea({
       return;
     }
 
-    // 〰️ LIN (Line Shape Edit) Pointer Move Handler
+    //  LIN (Line Shape Edit) Pointer Move Handler
     if (dragMode === ('lineEditPull' as any) && lineEditTargetObjectIdRef.current && lineEditStartLocalRef.current && lineEditInitialPointsRef.current) {
       const tId = lineEditTargetObjectIdRef.current;
       const targetObj = objects[tId];
@@ -8275,7 +8353,7 @@ function CanvasArea({
       return;
     }
 
-    // 〰️ LIN Tool dragMode: lineEditPull
+    //  LIN Tool dragMode: lineEditPull
     if (dragMode === ('lineEditPull' as any) && lineEditTargetObjectIdRef.current && lineEditStartLocalRef.current && lineEditInitialPointsRef.current) {
       const targetId = lineEditTargetObjectIdRef.current;
       const obj = objects[targetId];
@@ -8334,7 +8412,7 @@ function CanvasArea({
       return;
     }
 
-    // 〰️ LIN Tool dragMode: lineEditNode
+    //  LIN Tool dragMode: lineEditNode
     if (dragMode === ('lineEditNode' as any) && lineEditTargetObjectIdRef.current && lineEditDraggedNodeIdxRef.current !== null) {
       const targetId = lineEditTargetObjectIdRef.current;
       const obj = objects[targetId];
@@ -8365,7 +8443,7 @@ function CanvasArea({
       return;
     }
 
-    // 〰️ LIN Tool dragMode: lineEditSmooth
+    //  LIN Tool dragMode: lineEditSmooth
     if (dragMode === ('lineEditSmooth' as any) && lineEditTargetObjectIdRef.current) {
       const targetId = lineEditTargetObjectIdRef.current;
       const obj = objects[targetId];
@@ -8789,6 +8867,41 @@ function CanvasArea({
       return;
     }
 
+    if (isDrawing && activeTool === 'FIL') {
+      if (fillSubMode === 'part') {
+        setPartFillPoints(prev => [...prev, coords]);
+        return;
+      }
+      if (fillSubMode === 'drag_erase' || isFillEraseMode) {
+        const objId = activeFillEraseObjIdRef.current;
+        if (objId && objects[objId]) {
+          const targetObj = objects[objId];
+          const pivot = targetObj.pivots?.[0] || { localX: 0, localY: 0 };
+          const localPt = worldToLocal(coords, targetObj.transform, pivot);
+          setObjects(prev => {
+            const cur = prev[objId];
+            if (!cur) return prev;
+            const strokes = [...(cur.fillEraseStrokes || [])];
+            if (strokes.length > 0) {
+              const last = strokes[strokes.length - 1];
+              strokes[strokes.length - 1] = {
+                ...last,
+                points: [...last.points, localPt]
+              };
+            }
+            return {
+              ...prev,
+              [objId]: {
+                ...cur,
+                fillEraseStrokes: strokes
+              }
+            };
+          });
+        }
+        return;
+      }
+    }
+
     if (selectedObjectId) {
       const obj = objects[selectedObjectId];
       if (!obj) return;
@@ -8837,7 +8950,7 @@ function CanvasArea({
           const movedSet = new Set<string>();
           movedSet.add(selectedObjectId);
 
-          // ⚡ Real-Time Zero-Delay (0.00000001px) child & descendant position sync directly from snapshot
+          //  Real-Time Zero-Delay (0.00000001px) child & descendant position sync directly from snapshot
           if (snapshotMap && snapshotMap.size > 0) {
             snapshotMap.forEach((initT, objId) => {
               if (objId !== selectedObjectId && updated[objId]) {
@@ -9152,6 +9265,60 @@ function CanvasArea({
       setDragMode('none');
       historyPush();
       return;
+    }
+
+    if (activeTool === 'FIL') {
+      if (fillSubMode === 'part') {
+        if (partFillPoints.length >= 3) {
+          let targetObj = (selectedObjectId && objects[selectedObjectId]) ? objects[selectedObjectId] : null;
+          if (!targetObj) {
+            const visibleObjs = Object.values(objects).filter(o => !o.isHidden && !o.isLocked && o.type !== '360_container');
+            for (let i = visibleObjs.length - 1; i >= 0; i--) {
+              const o = visibleObjs[i];
+              const allObjPts = (o.points && o.points.length > 0) ? o.points : (o.subPaths ? o.subPaths.flat() : []);
+              if (allObjPts.length >= 3) {
+                targetObj = o;
+                break;
+              }
+            }
+          }
+
+          if (targetObj) {
+            const pivot = targetObj.pivots?.[0] || { localX: 0, localY: 0 };
+            const localLassoPoints = partFillPoints.map(p => worldToLocal(p, targetObj!.transform, pivot));
+            const newLassoFill = {
+              id: `fill_${Date.now()}`,
+              color: fillToolColor || '#ea580c',
+              localLassoPoints,
+              createdAt: Date.now()
+            };
+            setObjects(prev => {
+              const cur = prev[targetObj!.id];
+              if (!cur) return prev;
+              return {
+                ...prev,
+                [targetObj!.id]: {
+                  ...cur,
+                  autoFillInnerRegion: true,
+                  lassoFills: [...(cur.lassoFills || []), newLassoFill]
+                }
+              };
+            });
+            setSelectedObjectId(targetObj.id);
+            historyPush();
+          }
+        }
+        setPartFillPoints([]);
+        setIsDrawing(false);
+        return;
+      }
+
+      if (fillSubMode === 'drag_erase' || isFillEraseMode) {
+        activeFillEraseObjIdRef.current = null;
+        setIsDrawing(false);
+        historyPush();
+        return;
+      }
     }
 
     if (isDrawing && activeTool === 'BRS' && strokePointsRef.current.length > 0) {
@@ -9492,7 +9659,7 @@ function CanvasArea({
 
     setElasticWarningId(null);
 
-    // ✂️ CUTTER Tool Pointer Up Execution
+    //  CUTTER Tool Pointer Up Execution
     if (dragMode === 'cutter') {
       if (cutterPath.length > 1) {
         const targetId = selectedObjectId || Object.keys(objects)[0];
@@ -10266,8 +10433,8 @@ function CanvasArea({
       const worldPoints = localPoints.map(p => localToWorld(p, drawObj.transform, pivot));
 
       // Draw all paths (main points + subPaths of merged drawings, strictly separate)
-      const drawAllPaths = (forceClosePaths: boolean = false) => {
-        ctx.beginPath();
+      const drawAllPaths = (forceClosePaths: boolean = false, targetCtx: CanvasRenderingContext2D = ctx) => {
+        targetCtx.beginPath();
         if (drawObj.subPaths && drawObj.subPaths.length > 0) {
           drawObj.subPaths.forEach((sub, subIdx) => {
             const localSubPoints = sub.map((p, idx) => deformLocalPoint(p, drawObj, idx, subIdx));
@@ -10281,19 +10448,19 @@ function CanvasArea({
                 if (isHidden) {
                   penDown = false;
                 } else if (isGap) {
-                  ctx.moveTo(worldSubPoints[i].x, worldSubPoints[i].y);
+                  targetCtx.moveTo(worldSubPoints[i].x, worldSubPoints[i].y);
                   penDown = true;
                 } else {
                   if (!penDown) {
-                    ctx.moveTo(worldSubPoints[i].x, worldSubPoints[i].y);
+                    targetCtx.moveTo(worldSubPoints[i].x, worldSubPoints[i].y);
                     penDown = true;
                   } else {
-                    ctx.lineTo(worldSubPoints[i].x, worldSubPoints[i].y);
+                    targetCtx.lineTo(worldSubPoints[i].x, worldSubPoints[i].y);
                   }
                 }
               }
               if (forceClosePaths && (drawObj.fillGaps || drawObj.autoFillGaps)) {
-                ctx.closePath();
+                targetCtx.closePath();
               }
             }
           });
@@ -10305,19 +10472,19 @@ function CanvasArea({
             if (isHidden) {
               penDown = false;
             } else if (isGap) {
-              ctx.moveTo(worldPoints[i].x, worldPoints[i].y);
+              targetCtx.moveTo(worldPoints[i].x, worldPoints[i].y);
               penDown = true;
             } else {
               if (!penDown) {
-                ctx.moveTo(worldPoints[i].x, worldPoints[i].y);
+                targetCtx.moveTo(worldPoints[i].x, worldPoints[i].y);
                 penDown = true;
               } else {
-                ctx.lineTo(worldPoints[i].x, worldPoints[i].y);
+                targetCtx.lineTo(worldPoints[i].x, worldPoints[i].y);
               }
             }
           }
           if (forceClosePaths && (drawObj.fillGaps || drawObj.autoFillGaps)) {
-            ctx.closePath();
+            targetCtx.closePath();
           }
         }
       };
@@ -10802,74 +10969,110 @@ function CanvasArea({
         } else {
           const shouldFill2D = (drawObj.autoFillInnerRegion && hasExplicitFillColor) || drawObj.type === 'shape' || hasExplicitFillColor || (isStartEndClosed2D && hasExplicitFillColor);
           const active2DFillColor = hasExplicitFillColor ? drawObj.fillColor! : (drawObj.strokeColor || '#F59E0B');
+          const hasLassoFills = drawObj.lassoFills && drawObj.lassoFills.length > 0;
+          const hasFillErase = drawObj.fillEraseStrokes && drawObj.fillEraseStrokes.length > 0;
 
-          if (shouldFill2D) {
-            ctx.save();
-            if (subPathsToUse && subPathsToUse.length > 0) {
-              subPathsToUse.forEach((sub, subIdx) => {
-                const localSubPoints = sub.map((p, idx) => deformLocalPoint(p, drawObj, idx, subIdx));
-                const worldSubPoints = localSubPoints.map(p => localToWorld(p, drawObj.transform, pivot));
-                if (worldSubPoints.length >= 3) {
-                  ctx.beginPath();
-                  ctx.moveTo(worldSubPoints[0].x, worldSubPoints[0].y);
-                  for (let i = 1; i < worldSubPoints.length; i++) {
-                    ctx.lineTo(worldSubPoints[i].x, worldSubPoints[i].y);
+          const renderAllFillsToContext = (targetCtx: CanvasRenderingContext2D) => {
+            if (shouldFill2D) {
+              targetCtx.save();
+              if (subPathsToUse && subPathsToUse.length > 0) {
+                subPathsToUse.forEach((sub, subIdx) => {
+                  const localSubPoints = sub.map((p, idx) => deformLocalPoint(p, drawObj, idx, subIdx));
+                  const worldSubPoints = localSubPoints.map(p => localToWorld(p, drawObj.transform, pivot));
+                  if (worldSubPoints.length >= 3) {
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(worldSubPoints[0].x, worldSubPoints[0].y);
+                    for (let i = 1; i < worldSubPoints.length; i++) {
+                      targetCtx.lineTo(worldSubPoints[i].x, worldSubPoints[i].y);
+                    }
+                    targetCtx.closePath();
+                    targetCtx.fillStyle = active2DFillColor;
+                    targetCtx.fill('evenodd');
                   }
-                  ctx.closePath();
-                  ctx.fillStyle = active2DFillColor;
-                  ctx.fill('evenodd');
+                });
+              } else {
+                drawAllPaths(true, targetCtx);
+                targetCtx.fillStyle = active2DFillColor;
+                targetCtx.fill('evenodd');
+              }
+
+              const expansion = drawObj.gapFillExpansion ?? ((drawObj.autoFillGaps || drawObj.fillGaps || drawObj.autoFillInnerRegion) ? 4 : 0);
+              if (expansion > 0) {
+                targetCtx.strokeStyle = active2DFillColor;
+                targetCtx.lineWidth = expansion * 2;
+                targetCtx.lineJoin = 'round';
+                targetCtx.lineCap = 'round';
+                targetCtx.stroke();
+              }
+              targetCtx.restore();
+            }
+
+            if (hasLassoFills) {
+              drawObj.lassoFills!.forEach(fill => {
+                targetCtx.save();
+                const localPivot = drawObj.pivots?.[0] || { localX: 0, localY: 0 };
+                const worldLassoPoints = getWorldLassoPointsForObject(fill, drawObj, localPivot);
+                const ptsToDraw = (worldLassoPoints && worldLassoPoints.length >= 3)
+                  ? worldLassoPoints
+                  : (fill.localLassoPoints ? fill.localLassoPoints.map(p => localToWorld(p, drawObj.transform, localPivot)) : []);
+
+                if (ptsToDraw.length >= 3) {
+                  targetCtx.beginPath();
+                  targetCtx.moveTo(ptsToDraw[0].x, ptsToDraw[0].y);
+                  for (let i = 1; i < ptsToDraw.length; i++) {
+                    targetCtx.lineTo(ptsToDraw[i].x, ptsToDraw[i].y);
+                  }
+                  targetCtx.closePath();
+                  targetCtx.fillStyle = fill.color;
+                  targetCtx.fill('evenodd');
+
+                  const fillExp = drawObj.gapFillExpansion ?? (drawObj.autoFillGaps || drawObj.fillGaps ? 4 : 2);
+                  if (fillExp > 0) {
+                    targetCtx.strokeStyle = fill.color;
+                    targetCtx.lineWidth = fillExp * 2;
+                    targetCtx.lineJoin = 'round';
+                    targetCtx.lineCap = 'round';
+                    targetCtx.stroke();
+                  }
                 }
+                targetCtx.restore();
               });
+            }
+          };
+
+          if (shouldFill2D || hasLassoFills) {
+            if (hasFillErase) {
+              const offCanvas = document.createElement('canvas');
+              offCanvas.width = ctx.canvas.width;
+              offCanvas.height = ctx.canvas.height;
+              const offCtx = offCanvas.getContext('2d');
+              if (offCtx) {
+                renderAllFillsToContext(offCtx);
+                offCtx.save();
+                offCtx.globalCompositeOperation = 'destination-out';
+                drawObj.fillEraseStrokes!.forEach(stroke => {
+                  if (stroke.points && stroke.points.length > 0) {
+                    const localPivot = drawObj.pivots?.[0] || { localX: 0, localY: 0 };
+                    const worldPts = stroke.points.map(p => localToWorld(p, drawObj.transform, localPivot));
+                    offCtx.beginPath();
+                    offCtx.moveTo(worldPts[0].x, worldPts[0].y);
+                    for (let i = 1; i < worldPts.length; i++) {
+                      offCtx.lineTo(worldPts[i].x, worldPts[i].y);
+                    }
+                    offCtx.lineWidth = (stroke.radius || 25) * 2;
+                    offCtx.lineCap = 'round';
+                    offCtx.lineJoin = 'round';
+                    offCtx.strokeStyle = '#000000';
+                    offCtx.stroke();
+                  }
+                });
+                offCtx.restore();
+                ctx.drawImage(offCanvas, 0, 0);
+              }
             } else {
-              drawAllPaths(true);
-              ctx.fillStyle = active2DFillColor;
-              ctx.fill('evenodd');
+              renderAllFillsToContext(ctx);
             }
-
-            // Dilation bleed ONLY when autoFillGaps/fillGaps/autoFillInnerRegion is explicitly active
-            const expansion = drawObj.gapFillExpansion ?? ((drawObj.autoFillGaps || drawObj.fillGaps || drawObj.autoFillInnerRegion) ? 4 : 0);
-            if (expansion > 0) {
-              ctx.strokeStyle = active2DFillColor;
-              ctx.lineWidth = expansion * 2;
-              ctx.lineJoin = 'round';
-              ctx.lineCap = 'round';
-              ctx.stroke();
-            }
-            ctx.restore();
           }
-        }
-
-        // Render Lasso Fills BEFORE strokes so drawing strokes remain crisp on top!
-        if (drawObj.lassoFills && drawObj.lassoFills.length > 0) {
-          drawObj.lassoFills.forEach(fill => {
-            ctx.save();
-            const localPivot = drawObj.pivots?.[0] || { localX: 0, localY: 0 };
-            const worldLassoPoints = getWorldLassoPointsForObject(fill, drawObj, localPivot);
-            const ptsToDraw = (worldLassoPoints && worldLassoPoints.length >= 3)
-              ? worldLassoPoints
-              : (fill.localLassoPoints ? fill.localLassoPoints.map(p => localToWorld(p, drawObj.transform, localPivot)) : []);
-
-            if (ptsToDraw.length >= 3) {
-              ctx.beginPath();
-              ctx.moveTo(ptsToDraw[0].x, ptsToDraw[0].y);
-              for (let i = 1; i < ptsToDraw.length; i++) {
-                ctx.lineTo(ptsToDraw[i].x, ptsToDraw[i].y);
-              }
-              ctx.closePath();
-              ctx.fillStyle = fill.color;
-              ctx.fill('evenodd');
-
-              const fillExp = drawObj.gapFillExpansion ?? (drawObj.autoFillGaps || drawObj.fillGaps ? 4 : 2);
-              if (fillExp > 0) {
-                ctx.strokeStyle = fill.color;
-                ctx.lineWidth = fillExp * 2;
-                ctx.lineJoin = 'round';
-                ctx.lineCap = 'round';
-                ctx.stroke();
-              }
-            }
-            ctx.restore();
-          });
         }
 
         if (drawObj.type === 'stroke') {
@@ -11487,7 +11690,7 @@ function CanvasArea({
       }
     }
 
-    // 🌟 Render Wireframe Mesh Vertices & Selection Overlay (ONLY when WSC tool is active)
+    //  Render Wireframe Mesh Vertices & Selection Overlay (ONLY when WSC tool is active)
     if (activeTool === 'WSC' && effectiveSelectedObjectId && objects[effectiveSelectedObjectId]) {
       const obj = objects[effectiveSelectedObjectId];
       if (obj.wireframeMode && obj.points && obj.points.length > 0) {
@@ -11903,7 +12106,7 @@ function CanvasArea({
           ctx.font = `bold ${Math.max(10, Math.min(14, (isSelected ? 13 : 11) / zoomScale))}px sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
-          ctx.fillText(isSelected ? `⭐ Pt #${idx + 1}` : `Pt #${idx + 1}`, node.x, node.y - (14 / zoomScale));
+          ctx.fillText(isSelected ? ` Pt #${idx + 1}` : `Pt #${idx + 1}`, node.x, node.y - (14 / zoomScale));
           ctx.shadowBlur = 0;
         });
 
@@ -12041,7 +12244,7 @@ function CanvasArea({
         ctx.textBaseline = 'bottom';
         ctx.shadowColor = '#000000';
         ctx.shadowBlur = 3 / zoomScale;
-        ctx.fillText('🎯 Pivot Origin', pivotWorld.x, pivotWorld.y - (pivotR + 5 / zoomScale));
+        ctx.fillText(' Pivot Origin', pivotWorld.x, pivotWorld.y - (pivotR + 5 / zoomScale));
         ctx.shadowBlur = 0;
 
         ctx.restore();
@@ -12334,7 +12537,7 @@ function CanvasArea({
       }
     }
 
-    // ✂️ CUTTER Tool active path rendering
+    //  CUTTER Tool active path rendering
     if (activeTool === 'CUTTER' && cutterPath.length > 0) {
       ctx.save();
       ctx.beginPath();
@@ -12362,7 +12565,7 @@ function CanvasArea({
       ctx.restore();
     }
 
-    // 🎯 CONTOUR EDITOR handles rendering
+    //  CONTOUR EDITOR handles rendering
     if ((activeTool === 'CONTOUR_EDITOR' || activeTool === 'DIRECT_SELECT') && selectedObjectId && objects[selectedObjectId]) {
       const obj = objects[selectedObjectId];
       if (obj.points && obj.points.length > 0) {
@@ -12421,7 +12624,7 @@ function CanvasArea({
       }
     }
 
-    // 🌟 MESH PUPPET WRAP (MWP) ON-SCREEN OVERLAYS
+    //  MESH PUPPET WRAP (MWP) ON-SCREEN OVERLAYS
     if (activeTool === 'MWP' && effectiveSelectedObjectId && objects[effectiveSelectedObjectId] && mwpState) {
       const obj = objects[effectiveSelectedObjectId];
       const localPivot = obj.pivots?.[0] || { localX: 0, localY: 0 };
@@ -12590,7 +12793,7 @@ function CanvasArea({
       ctx.restore();
     }
 
-    // 🎛️ MASTER CONTROLLERS on-screen widgets rendering (Only visible when MASTER_CONTROLLER tool is active)
+    //  MASTER CONTROLLERS on-screen widgets rendering (Only visible when MASTER_CONTROLLER tool is active)
     if (activeTool === 'MASTER_CONTROLLER' && masterControllers && masterControllers.length > 0) {
       ctx.save();
       masterControllers.forEach(w => {
@@ -12660,7 +12863,7 @@ function CanvasArea({
       ctx.restore();
     }
 
-    // 🦴 HIERARCHY & PEGS rendering (Only visible when PEG_HIERARCHY tool is active)
+    //  HIERARCHY & PEGS rendering (Only visible when PEG_HIERARCHY tool is active)
     if (activeTool === 'PEG_HIERARCHY' && pegNodes && pegNodes.length > 0) {
       ctx.save();
       pegNodes.forEach(p => {
@@ -12704,7 +12907,7 @@ function CanvasArea({
         ctx.fillStyle = '#A855F7';
         ctx.font = `bold ${Math.max(9, 10 / zoomScale)}px sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText(`📍 ${p.name}`, p.position.x, p.position.y - 12 / zoomScale);
+        ctx.fillText(` ${p.name}`, p.position.x, p.position.y - 12 / zoomScale);
       });
       ctx.restore();
     }
@@ -12811,7 +13014,7 @@ function CanvasArea({
       }
     }
 
-    // 🔘 PTS (Point Shape Sculptor) Persistent Drawing & Interactive Overlay
+    //  PTS (Point Shape Sculptor) Persistent Drawing & Interactive Overlay
     if (pointShapeState && pointShapeState.nodes && pointShapeState.nodes.length > 0) {
       const { nodes, isClosed, fillColor, strokeColor, strokeWidth, showPoints, showStrokes, selectedNodeId, mode, brushRadius, brushType } = pointShapeState;
       ctx.save();
@@ -12946,7 +13149,7 @@ function CanvasArea({
       ctx.restore();
     }
 
-    // ⚡ TWITCH TOOL OVERLAY RENDERING (Identification highlights, curve handles, mesh lattices)
+    //  TWITCH TOOL OVERLAY RENDERING (Identification highlights, curve handles, mesh lattices)
     if ((activeTool === 'TWT' || activeTool === 'twitch') && effectiveSelectedObjectId && objects[effectiveSelectedObjectId]) {
       const obj = objects[effectiveSelectedObjectId];
       if (obj.twitchState && obj.twitchState.active && obj.twitchState.shapes && obj.twitchState.shapes.length > 0) {
@@ -13182,6 +13385,38 @@ function CanvasArea({
       ctx.restore();
     }
 
+    // Render Part Fill & Drag Erase Preview
+    if (activeTool === 'FIL') {
+      if (fillSubMode === 'part' && partFillPoints.length > 1) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(partFillPoints[0].x, partFillPoints[0].y);
+        for (let i = 1; i < partFillPoints.length; i++) {
+          ctx.lineTo(partFillPoints[i].x, partFillPoints[i].y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 2 / zoomScale;
+        ctx.setLineDash([4 / zoomScale, 3 / zoomScale]);
+        ctx.stroke();
+        ctx.fillStyle = fillToolColor ? `${fillToolColor}40` : 'rgba(234, 88, 12, 0.25)';
+        ctx.fill();
+        ctx.restore();
+      } else if (fillSubMode === 'drag_erase' || isFillEraseMode) {
+        ctx.save();
+        ctx.beginPath();
+        const r = (fillEraseRadius ?? 25);
+        ctx.arc(currentCursorPos.x, currentCursorPos.y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 1.5 / zoomScale;
+        ctx.setLineDash([3 / zoomScale, 2 / zoomScale]);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(234, 88, 12, 0.15)';
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
     // Render active bones list linkage overlays
     if (!isRecording && !isPlaying && (showBones || activeTool === 'BON')) {
       bones.forEach((bone) => {
@@ -13310,6 +13545,24 @@ function CanvasArea({
       ctx.restore();
     }
 
+    // Render active Part Fill drawing preview (when Fill Tool in Part mode is active)
+    if (activeTool === 'FIL' && !isRecording && !isPlaying && partFillPoints && partFillPoints.length > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(partFillPoints[0].x, partFillPoints[0].y);
+      for (let i = 1; i < partFillPoints.length; i++) {
+        ctx.lineTo(partFillPoints[i].x, partFillPoints[i].y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = (fillToolColor || '#ea580c') + '33';
+      ctx.fill();
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 3]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // Render current active Free Selection Lasso path (FSL) (ONLY when FSL tool is active)
     if (activeTool === 'FSL' && !isRecording && !isPlaying && fslPoints && fslPoints.length > 0 && !hideFslSelection) {
       ctx.save();
@@ -13405,7 +13658,7 @@ function CanvasArea({
       ctx.restore();
     }
 
-    // 🖌️ SCB (Sculpt & Correct Brush) Live Visual Overlay
+    //  SCB (Sculpt & Correct Brush) Live Visual Overlay
     if (activeTool === 'SCB' && currentCursorPos) {
       ctx.save();
       const rad = sculptBrushState?.brushRadius || 60;
@@ -13454,7 +13707,7 @@ function CanvasArea({
       ctx.restore();
     }
 
-    // 〰️ LIN (Line Shape Edit) Dynamic Snapped Stroke Overlay
+    //  LIN (Line Shape Edit) Dynamic Snapped Stroke Overlay
     // Only rendered when Line Tool is active; automatically hidden when switching tools!
     if (activeTool === 'LIN') {
       const targetId = effectiveSelectedObjectId || selectedObjectId;
@@ -13599,7 +13852,7 @@ function CanvasArea({
         ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
         ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
         ctx.lineWidth = 1 / zoomScale;
-        const badgeText = `〰 LINE EDIT: ${editMode.toUpperCase()} (R: ${pullRadius}px)`;
+        const badgeText = ` LINE EDIT: ${editMode.toUpperCase()} (R: ${pullRadius}px)`;
         ctx.font = `bold ${Math.max(9, 11 / zoomScale)}px sans-serif`;
         const textWidth = ctx.measureText(badgeText).width;
         const padX = 8 / zoomScale;
@@ -13790,7 +14043,7 @@ function CanvasArea({
 
       {/* Floating HUD Bar for Master Controllers (MCT) */}
       {activeTool === 'MASTER_CONTROLLER' && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 backdrop-blur border border-amber-500/40 px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 border border-amber-500/40 px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto">
           <span className="text-[11px] font-black text-amber-400 uppercase tracking-wide flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             Master Controller
@@ -13863,7 +14116,7 @@ function CanvasArea({
 
       {/* Floating HUD Bar for Peg Hierarchy (PEG) */}
       {activeTool === 'PEG_HIERARCHY' && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 backdrop-blur border border-purple-500/40 px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 border border-purple-500/40 px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto">
           <span className="text-[11px] font-black text-purple-400 uppercase tracking-wide flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
             Peg Hierarchy
@@ -13918,13 +14171,11 @@ function CanvasArea({
 
       {/* Floating HUD Bar for Bone Deformer (BNC / BONE_CURVE) */}
       {(activeTool === 'BONE_CURVE' || activeTool === 'BNC') && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 backdrop-blur border border-amber-500/40 px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 border border-amber-500/40 px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto">
           <span className="text-[11px] font-black text-amber-400 uppercase tracking-wide flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             Bone & Curve Deformer
           </span>
-          <div className="h-4 w-px bg-neutral-800" />
-          <p className="text-[10px] text-neutral-300 font-medium">Click on your drawing or canvas to place bone joint nodes and bend limbs.</p>
           {selectedObjectId && (
             <button
               type="button"
@@ -13937,7 +14188,7 @@ function CanvasArea({
         </div>
       )}
 
-      {/* ⚡ Twitch Tool Floating Canvas HUD */}
+      {/*  Twitch Tool Floating Canvas HUD */}
       <TwitchCanvasHud
         selectedObject={effectiveSelectedObjectId ? objects[effectiveSelectedObjectId] : null}
         updateObject={updateObjectProperties}
@@ -13950,7 +14201,7 @@ function CanvasArea({
       {showCanvasSizePanel && (
         <div 
           id="canvas-size-modal-overlay" 
-          className="fixed inset-0 bg-neutral-950/85 backdrop-blur-md flex items-center justify-center z-[100] p-4 sm:p-8 pointer-events-auto animate-fade-in"
+          className="fixed inset-0 bg-neutral-950/85 flex items-center justify-center z-[100] p-4 sm:p-8 pointer-events-auto animate-fade-in"
         >
           <div 
             className="bg-neutral-900 border border-neutral-800 p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-4xl flex flex-col gap-6 text-white animate-scale-up max-h-[90vh] overflow-y-auto"
@@ -13968,9 +14219,6 @@ function CanvasArea({
                 <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wide text-neutral-100">
                   Adjust Canvas Stage Resolution
                 </h3>
-                <p className="text-xs sm:text-sm text-neutral-400 font-medium leading-relaxed max-w-2xl">
-                  Resize the active animation sheet to fit your project requirements. Select an industry preset or enter custom pixel dimensions.
-                </p>
               </div>
               <button
                 type="button"
@@ -14193,7 +14441,7 @@ function CanvasArea({
 
       {/* Floating Canvas controls HUD */}
       {!isRecording && !isPlaying && (
-        <div id="canvas-zoom-hud" className="absolute bottom-4 right-4 flex items-center gap-1 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full border border-gray-200 shadow-md pointer-events-auto z-50">
+        <div id="canvas-zoom-hud" className="absolute bottom-4 right-4 flex items-center gap-1 bg-white/95 px-2.5 py-1 rounded-full border border-gray-200 shadow-md pointer-events-auto z-50">
           <button
             id="btn-zoom-out"
             onClick={zoomOut}

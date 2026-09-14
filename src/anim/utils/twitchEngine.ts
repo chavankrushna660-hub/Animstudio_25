@@ -3,7 +3,7 @@ import { VectorObject, Point, Transform, TwitchIdentifiedShape, TwitchToolState,
 import { distance, isPointInPolygon, calculateBoundingBox } from './math';
 
 /**
- * 🧵 TWITCH ENGINE — Complete Vector Topology & Drawing Dissector
+ *  TWITCH ENGINE — Complete Vector Topology & Drawing Dissector
  * Implements Planar Graph Conversion, Cycle Detection, Gap Tolerance (2px),
  * Shared Stroke Resolution, Auto-Closing Open Paths (Internally), and All Transform/Deform Modes.
  */

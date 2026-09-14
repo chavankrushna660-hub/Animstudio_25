@@ -14,7 +14,7 @@ import {
   EyeOff,
   GitPullRequest,
   Maximize,
-  Sparkles,
+  SlidersHorizontal,
   Clock
 } from 'lucide-react';
 import CustomSelect from './CustomSelect';
@@ -173,15 +173,16 @@ function Timeline({
         {/* Left: Playback Buttons */}
         <div className="flex items-center gap-2 bg-neutral-900 border-2 border-neutral-750 p-1.5 rounded-2xl shadow-md">
           <button
+            id="timeline-play-btn"
             onClick={handlePlayPause}
-            className={`p-2.5 rounded-xl transition-all cursor-pointer ${
+            className={`p-2.5 rounded-xl transition-all cursor-pointer shadow-md border-2 ${
               isPlaying 
-                ? 'bg-amber-500 text-neutral-950 hover:bg-amber-400 shadow-md scale-105' 
-                : 'hover:bg-neutral-800 text-neutral-200 hover:text-white'
+                ? 'bg-yellow-200 text-neutral-950 hover:bg-yellow-100 border-yellow-300 scale-105' 
+                : 'bg-yellow-200 text-neutral-950 hover:bg-yellow-100 border-yellow-300'
             }`}
             title={isPlaying ? "Pause" : "Play"}
           >
-            {isPlaying ? <Pause className="w-5 h-5 fill-current stroke-[2.5]" /> : <Play className="w-5 h-5 fill-current stroke-[2.5]" />}
+            {isPlaying ? <Pause className="w-5 h-5 fill-current stroke-[2.8]" /> : <Play className="w-5 h-5 fill-current stroke-[2.8]" />}
           </button>
           <button
             onClick={handleStop}
@@ -195,7 +196,7 @@ function Timeline({
             onClick={() => setLoopEnabled(!loopEnabled)}
             className={`p-2.5 rounded-xl transition-colors cursor-pointer border-2 ${
               loopEnabled 
-                ? 'text-amber-300 bg-amber-500/20 border-amber-400/60 shadow-sm' 
+                ? 'text-neutral-100 bg-neutral-800 border-neutral-600 shadow-sm' 
                 : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200 border-transparent'
             }`}
             title="Toggle Loop"
@@ -206,7 +207,7 @@ function Timeline({
 
         {/* Frame Actions (Copy, Paste, Duplicate, Delete) */}
         <div className="flex items-center gap-2 bg-neutral-900 border-2 border-neutral-750 p-1.5 rounded-2xl shadow-md">
-          <span className="text-xs text-amber-400 font-black tracking-wider uppercase px-2 font-mono">#{currentFrameIndex + 1}</span>
+          <span className="text-xs text-neutral-200 font-black tracking-wider uppercase px-2 font-mono">{currentFrameIndex + 1}</span>
           <div className="w-[2px] h-7 bg-neutral-800 mx-1"></div>
           <button
             type="button"
@@ -232,7 +233,7 @@ function Timeline({
           <button
             type="button"
             onClick={() => duplicateFrame(currentFrameIndex)}
-            className="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-amber-200 transition-all text-xs flex items-center gap-2 cursor-pointer font-black border-2 border-amber-500/40"
+            className="px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white transition-all text-xs flex items-center gap-2 cursor-pointer font-black border-2 border-neutral-700"
             title="Duplicate current frame"
           >
             <Plus className="w-5 h-5 stroke-[2.6]" />
@@ -286,7 +287,7 @@ function Timeline({
               }`}
               title="Toggle real-time automatic tweening interpolation between keyframes"
             >
-              <Sparkles className="w-4.5 h-4.5 shrink-0 stroke-[2.4]" />
+              <SlidersHorizontal className="w-4.5 h-4.5 shrink-0 stroke-[2.4]" />
               <span className="text-xs font-black">AUTO-TWEEN</span>
             </button>
           </div>
@@ -465,13 +466,13 @@ function Timeline({
               <button
                 type="button"
                 onClick={onStartAutoFrames}
-                className="h-10 px-4 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-black text-xs uppercase rounded-xl tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg border-2 border-amber-300 active:scale-95"
+                className="h-10 px-4 bg-neutral-800 hover:bg-neutral-750 text-neutral-100 font-black text-xs uppercase rounded-xl tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md border-2 border-neutral-700 active:scale-95"
               >
                 <Play className="w-4 h-4 fill-current stroke-[2.4]" />
                 Start Auto Frames ({autoFramesDelay}s)
               </button>
             ) : autoFramesStatus === 'countdown' ? (
-              <div className="h-10 px-4 flex items-center justify-center font-black text-amber-400 text-xs bg-neutral-950 rounded-xl border-2 border-amber-500/50 animate-pulse">
+              <div className="h-10 px-4 flex items-center justify-center font-black text-neutral-200 text-xs bg-neutral-950 rounded-xl border-2 border-neutral-700 animate-pulse">
                 Starting in {autoFramesCountdown}s...
               </div>
             ) : (
@@ -489,7 +490,7 @@ function Timeline({
                   <button
                     type="button"
                     onClick={onResumeAutoFrames}
-                    className="h-10 px-3.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 border-2 border-amber-300 cursor-pointer"
+                    className="h-10 px-3.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-100 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 border-2 border-neutral-700 cursor-pointer"
                   >
                     <Play className="w-4 h-4 fill-current" />
                     Resume
@@ -523,17 +524,17 @@ function Timeline({
               }}
               className={`group min-w-[76px] h-20 rounded-2xl border-2 flex flex-col justify-between p-2.5 cursor-pointer transition-all relative shrink-0 shadow-md ${
                 isActive
-                  ? 'bg-amber-500/20 border-amber-400 shadow-[0_0_18px_rgba(245,158,11,0.3)] scale-[1.03]'
+                  ? 'bg-neutral-800 border-neutral-400 shadow-md scale-[1.02]'
                   : 'bg-neutral-900/90 hover:bg-neutral-900 border-neutral-750 hover:border-neutral-600'
               }`}
             >
               {/* Frame Label */}
               <div className="flex items-center justify-between">
-                <span className={`text-xs sm:text-sm font-mono ${isActive ? 'text-amber-300 font-black' : 'text-neutral-300 font-bold'}`}>
-                  #{index + 1}
+                <span className={`text-xs sm:text-sm font-mono ${isActive ? 'text-white font-black' : 'text-neutral-300 font-bold'}`}>
+                  {index + 1}
                 </span>
                 {frame.objects && Object.keys(frame.objects).length > 0 && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm" title="Has keyframe transforms"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-neutral-400 shadow-sm" title="Has keyframe transforms"></span>
                 )}
               </div>
 
@@ -547,11 +548,12 @@ function Timeline({
 
         {/* Append Frame Button */}
         <button
+          id="timeline-add-frame-btn"
           onClick={addFrame}
-          className="min-w-[76px] h-20 rounded-2xl border-2 border-dashed border-neutral-600 hover:border-amber-400 bg-neutral-900/60 hover:bg-neutral-900 flex items-center justify-center text-neutral-200 hover:text-amber-300 transition-all cursor-pointer shrink-0 shadow-md"
+          className="min-w-[76px] h-20 rounded-2xl border-2 border-yellow-300 bg-yellow-200 hover:bg-yellow-100 flex items-center justify-center text-neutral-950 transition-all cursor-pointer shrink-0 shadow-md active:scale-95"
           title="Add New Frame"
         >
-          <Plus className="w-7 h-7 stroke-[2.6]" />
+          <Plus className="w-7 h-7 stroke-[3] text-neutral-950" />
         </button>
 
         {/* Batch Add Frames Section */}
@@ -577,7 +579,7 @@ function Timeline({
             onClick={() => {
               batchAddFrames(batchCount);
             }}
-            className="h-9 px-4 rounded-xl bg-amber-500 text-neutral-950 hover:bg-amber-400 font-black text-xs transition-all flex items-center justify-center self-end cursor-pointer shadow-md border-2 border-amber-300 active:scale-95"
+            className="h-9 px-4 rounded-xl bg-neutral-800 text-neutral-100 hover:bg-neutral-750 font-black text-xs transition-all flex items-center justify-center self-end cursor-pointer shadow-md border-2 border-neutral-700 active:scale-95"
           >
             ADD
           </button>

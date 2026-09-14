@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen w-full bg-neutral-950 text-white flex flex-col items-center justify-center p-6 text-center select-none font-sans">
           <div className="max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl font-bold">
-              ⚡
+              
             </div>
             <h2 className="text-lg font-black tracking-wide text-neutral-100">Workspace Active & Protected</h2>
             <p className="text-xs text-neutral-400 leading-relaxed">

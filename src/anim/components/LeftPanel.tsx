@@ -18,7 +18,8 @@ import {
   ChevronLeft, 
   Image as ImageIcon, 
   Type as TextIcon, 
-  Sparkles, 
+  CheckCircle2,
+  Compass,
   Layers, 
   Layers as LayerIcon, 
   Box, 
@@ -41,7 +42,7 @@ import {
   RefreshCw,
   Sliders,
   Palette,
-  Zap,
+  Activity,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -97,6 +98,10 @@ interface LeftPanelProps {
   ignoreInnerDrawings?: boolean;
   setIgnoreInnerDrawings?: React.Dispatch<React.SetStateAction<boolean>>;
   applyColorFillToSelected?: () => void;
+  fillSubMode?: 'whole' | 'part' | 'drag_erase';
+  setFillSubMode?: (val: 'whole' | 'part' | 'drag_erase') => void;
+  fillEraseRadius?: number;
+  setFillEraseRadius?: (r: number) => void;
   isFillEraseMode?: boolean;
   setIsFillEraseMode?: (val: boolean) => void;
   removeColorFillFromSelected?: () => void;
@@ -161,6 +166,10 @@ function LeftPanel({
   ignoreInnerDrawings = true,
   setIgnoreInnerDrawings,
   applyColorFillToSelected,
+  fillSubMode = 'whole',
+  setFillSubMode,
+  fillEraseRadius = 25,
+  setFillEraseRadius,
   isFillEraseMode = false,
   setIsFillEraseMode,
   removeColorFillFromSelected,
@@ -449,7 +458,7 @@ function LeftPanel({
             ) : obj.type === 'text' ? (
               <TextIcon className="w-4.5 h-4.5 stroke-[2.3] text-neutral-400 shrink-0" />
             ) : (
-              <Sparkles className="w-4.5 h-4.5 stroke-[2.3] text-amber-400 shrink-0" />
+              <PenTool className="w-4.5 h-4.5 stroke-[2.3] text-neutral-300 shrink-0" />
             )}
 
             {/* 2-Letter Badge to guarantee clear visibility when space is compact */}
@@ -633,7 +642,7 @@ function LeftPanel({
           open ? 'w-64' : 'w-0'
         }`}
       >
-        <div className={`pointer-events-auto w-full h-full bg-neutral-900/95 backdrop-blur-md border-r-2 border-neutral-800 flex flex-col overflow-hidden ${
+        <div className={`pointer-events-auto w-full h-full bg-neutral-900/95 border-r-2 border-neutral-800 flex flex-col overflow-hidden ${
           open ? 'w-64' : 'w-0 border-r-0'
         }`}>
         {open && (
@@ -671,7 +680,7 @@ function LeftPanel({
             onDrop={(e) => handleDrop(null, e)}
             className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin select-none"
           >
-            {/* 🎭 Swap Studio Quick Tool */}
+            {/*  Swap Studio Quick Tool */}
             <div className="border-2 border-indigo-500/50 bg-neutral-900 rounded-2xl p-3.5 space-y-2.5 shrink-0 shadow-lg" id="shape-studio-left-panel">
               <div className="flex items-center justify-between text-indigo-400">
                 <div className="flex items-center gap-2 font-black text-xs uppercase tracking-wider">
@@ -682,9 +691,6 @@ function LeftPanel({
                   SWP
                 </span>
               </div>
-              <p className="text-xs text-neutral-300 leading-relaxed font-bold">
-                Add selected drawings as swapable parts. Transform &amp; move automatically with the main character while position stays locked.
-              </p>
               <button
                 type="button"
                 id="btn-open-shape-studio"
@@ -696,19 +702,17 @@ function LeftPanel({
                 }`}
               >
                 <Layers className="w-4.5 h-4.5 stroke-[2.4]" />
-                {activeTool === 'SWAP_STUDIO' || activeTool === 'SWP' || activeTool === 'SST' ? '✓ Swap Studio (SWP) Active' : '▶ Open Swap Studio (SWP)'}
+                {activeTool === 'SWAP_STUDIO' || activeTool === 'SWP' || activeTool === 'SST' ? 'Swap Studio (SWP) Active' : '▶ Open Swap Studio (SWP)'}
               </button>
             </div>
 
-            {/* 🎯 Adaptive Geometry Deformation Controller */}
+            {/* Adaptive Geometry Deformation Controller */}
             <div className="border-2 border-amber-500/40 bg-neutral-950/90 rounded-2xl p-3.5 space-y-3.5 shrink-0 shadow-lg" id="adaptive-subdivision-panel">
-              <div className="flex items-center gap-2 text-amber-400">
-                <Sparkles className="w-4.5 h-4.5 stroke-[2.4] animate-pulse" />
+              <div className="flex items-center gap-2 text-neutral-300">
+                <Sliders className="w-4.5 h-4.5 stroke-[2.4]" />
                 <span className="text-xs font-black uppercase tracking-wider">Deformation Points Control</span>
               </div>
-              <p className="text-xs text-neutral-300 leading-relaxed font-bold">
-                Control dynamic point generation when stretching edges of 3D models & 2D drawings.
-              </p>
+
               
               <div className="flex items-center gap-2.5">
                 <button
@@ -760,7 +764,7 @@ function LeftPanel({
               </div>
             </div>
 
-            {/* 📋 Selected Drawing Quick Controls */}
+            {/* Selected Drawing Quick Controls */}
             {selectedObjectId && objects[selectedObjectId] && (
               <div className="border border-neutral-800 bg-neutral-950/80 rounded-2xl p-3 space-y-2.5 shrink-0 shadow-lg" id="selected-drawing-controls">
                 <div className="flex items-center justify-between">
@@ -870,25 +874,18 @@ function LeftPanel({
               </div>
             )}
 
-            {/* 📌 Points-Based Movement (PBM) & Rigid Point Deform Panel */}
+            {/* Points-Based Movement (PBM) & Rigid Point Deform Panel */}
             {(activeTool === 'PBM' || activeTool === 'RPD') && (
               <div className="border border-blue-500/40 bg-neutral-950/90 rounded-2xl p-3 space-y-3 shrink-0 shadow-lg animate-fade-in" id="pbm-left-panel">
                 <div className="flex items-center gap-1.5 text-blue-400">
                   <GitCommit className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-wider font-sans">🎯 Points-Based Movement (PBM)</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider font-sans">Points-Based Movement (PBM)</span>
                 </div>
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Click on drawing to place <b>Blue Points</b>. Minimum 2 points are strictly required (e.g., Shoulder &amp; Hand). Drag points to move drawing sections strictly as-is without stroke distortion or overlap!
-                </p>
-                <div className="bg-neutral-900/80 p-2 rounded-xl border border-neutral-800 text-[9px] text-blue-300 font-bold space-y-1">
-                  <div>• <b>Blue Points</b>: Joint skeleton points</div>
-                  <div>• <b>Yellow Point</b>: Active selected point with capture radius</div>
-                  <div>• <b>Extrude Mode</b>: Spawn connected joint chains</div>
-                </div>
+
               </div>
             )}
 
-            {/* 🖌️ Brush Tool Controls */}
+            {/* Brush Tool Controls */}
             {(activeTool === 'BRS' || activeTool === 'VLB') && brushSettings && setBrushSettings && (
               <div className="border border-amber-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="brush-tool-panel">
                 <div className="flex items-center justify-between">
@@ -1017,10 +1014,10 @@ function LeftPanel({
                   </div>
                 </div>
 
-                {/* 🎲 Organic Khadra Texture & Jitter Engine */}
+                {/* Organic Khadra Texture & Jitter Engine */}
                 <div className="space-y-2 bg-neutral-900/80 p-2.5 rounded-xl border border-amber-500/20">
-                  <div className="flex items-center gap-1.5 text-amber-300">
-                    <Zap className="w-3 h-3" />
+                  <div className="flex items-center gap-1.5 text-neutral-300">
+                    <Activity className="w-3 h-3" />
                     <span className="text-[9px] font-black uppercase tracking-wide">Khadra Texture &amp; Jitter</span>
                   </div>
                   
@@ -1152,7 +1149,7 @@ function LeftPanel({
               </div>
             )}
 
-            {/* 🧹 Eraser Tool Controls */}
+            {/* Eraser Tool Controls */}
             {activeTool === 'ERS' && eraserSettings && setEraserSettings && (
               <div className="border border-rose-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="eraser-tool-panel">
                 <div className="flex items-center justify-between text-rose-400">
@@ -1165,9 +1162,7 @@ function LeftPanel({
                   </span>
                 </div>
 
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Strictly deletes vector paths and splits strokes into true separate segments. Never covers drawings with white paint!
-                </p>
+
 
                 {/* Eraser Size Slider & Circle Indicator */}
                 <div className="space-y-1.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800">
@@ -1288,7 +1283,7 @@ function LeftPanel({
               </div>
             )}
 
-            {/* ✒️ Pen / Bezier Tool Controls */}
+            {/* Pen / Bezier Tool Controls */}
             {activeTool === 'PEN' && (
               <div className="border border-cyan-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="pen-tool-panel">
                 <div className="flex items-center justify-between text-cyan-400">
@@ -1301,16 +1296,7 @@ function LeftPanel({
                   </span>
                 </div>
 
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Click or drag to place <b>Anchor Points</b> and <b>Direction Tangents</b>. The stroke draws, blends, and bends in real time — no need to connect first and last point!
-                </p>
 
-                <div className="bg-neutral-900/80 p-2 rounded-xl border border-neutral-800 text-[9px] text-cyan-300 font-bold space-y-1">
-                  <div>• <b>Click & Drag:</b> Add anchor & pull handles to stretch/bend</div>
-                  <div>• <b>Real-time Stroke:</b> Stroke renders & blends live on canvas</div>
-                  <div>• <b>Edit Tangents:</b> Click square anchor or handle dots to reshape</div>
-                  <div>• <b>Erase Drawing:</b> Use Eraser tool or click Erase button below</div>
-                </div>
 
                 {/* Path Action & Erase Controls */}
                 <div className="space-y-1.5">
@@ -1325,7 +1311,7 @@ function LeftPanel({
                     }}
                     className="w-full bg-cyan-500 hover:bg-cyan-400 text-neutral-950 text-[9.5px] font-black py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer shadow-md text-center flex items-center justify-center gap-1.5"
                   >
-                    <Sparkles className="w-3 h-3" />
+                    <CheckCircle2 className="w-3 h-3" />
                     Finish / New Pen Stroke
                   </button>
 
@@ -1382,16 +1368,14 @@ function LeftPanel({
               </div>
             )}
 
-            {/* 🎯 Lasso Batch Processing Suite */}
+            {/* Lasso Batch Processing Suite */}
             {activeTool === 'LSO' && (
               <div className="border border-amber-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="lasso-batch-panel">
-                <div className="flex items-center gap-1.5 text-amber-400">
-                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                <div className="flex items-center gap-1.5 text-neutral-300">
+                  <Layers className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-black uppercase tracking-wider font-sans">Lasso Batch Processing Suite</span>
                 </div>
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Draw a closed loop around multiple drawings on the canvas. Perform batch duplicate, move, scale, delete, or bulk color changes!
-                </p>
+
                 
                 {lassoPoints && lassoPoints.length >= 3 ? (
                   <div className="space-y-2.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800">
@@ -1515,15 +1499,11 @@ function LeftPanel({
                       Delete Batch Enclosed
                     </button>
                   </div>
-                ) : (
-                  <div className="p-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
-                    <span className="text-[9px] text-neutral-500 font-extrabold leading-normal block">Draw a closed loop on the canvas to select drawings.</span>
-                  </div>
-                )}
+                ) : null}
               </div>
             )}
 
-            {/* 🎯 Pivot Tool Controls */}
+            {/* Pivot Tool Controls */}
             {activeTool === 'PVT' && (
               <div className="border border-indigo-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="pivot-tool-panel">
                 <div className="flex items-center justify-between text-indigo-400">
@@ -1536,9 +1516,7 @@ function LeftPanel({
                   </span>
                 </div>
 
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Sets the rotation and scaling center point of drawings. Click anywhere on canvas or choose a 9-point snapping anchor!
-                </p>
+
 
                 {selectedObjectId && objects[selectedObjectId] ? (
                   <div className="space-y-2.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800">
@@ -1653,15 +1631,11 @@ function LeftPanel({
                       Reset Pivot to Center
                     </button>
                   </div>
-                ) : (
-                  <div className="p-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
-                    <span className="text-[9px] text-neutral-500 font-extrabold leading-normal block">Select a drawing to adjust its pivot point.</span>
-                  </div>
-                )}
+                ) : null}
               </div>
             )}
 
-            {/* 🗡️ Knife Tool Controls */}
+            {/* Knife Tool Controls */}
             {activeTool === 'KNF' && knifeSettings && setKnifeSettings && (
               <div className="border border-emerald-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="knife-tool-panel">
                 <div className="flex items-center justify-between text-emerald-400">
@@ -1674,9 +1648,7 @@ function LeftPanel({
                   </span>
                 </div>
 
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Drag across any 2D vector drawing or 3D object to slice it into distinct separate objects along the cut line!
-                </p>
+
 
                 {/* Separation Gap Slider */}
                 <div className="space-y-1.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800">
@@ -1753,7 +1725,7 @@ function LeftPanel({
               </div>
             )}
 
-            {/* 🧹 Smart Vector Eraser Suite */}
+            {/* Smart Vector Eraser Suite */}
             {activeTool === 'ERS' && eraserSettings && setEraserSettings && (
               <div className="border border-rose-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="eraser-tool-panel">
                 <div className="flex items-center justify-between text-rose-400">
@@ -1766,9 +1738,7 @@ function LeftPanel({
                   </span>
                 </div>
 
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Cut, split, or erase vector lines and shapes in real-time. Works across both individual drawings and 3D meshes.
-                </p>
+
 
                 {/* Eraser Radius Slider */}
                 <div className="space-y-1.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800">
@@ -1843,7 +1813,7 @@ function LeftPanel({
               </div>
             )}
 
-            {/* 🖌️ ML Smart Brush Suite */}
+            {/* ML Smart Brush Suite */}
             {activeTool === 'BRS' && brushSettings && setBrushSettings && (
               <div className="border border-cyan-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="brush-tool-panel">
                 <div className="flex items-center justify-between text-cyan-400">
@@ -1984,7 +1954,7 @@ function LeftPanel({
 
 
 
-            {/* 🤖 Machine Learning Acceleration & Smart Shape Studio */}
+            {/* Machine Learning Acceleration & Smart Shape Studio */}
             {mlSettings && setMlSettings && (
               <div className="border border-purple-500/40 bg-neutral-950/95 rounded-2xl p-3 space-y-3 shrink-0 shadow-xl animate-fade-in" id="ml-ai-panel">
                 <div className="flex items-center justify-between text-purple-400">
@@ -1997,15 +1967,13 @@ function LeftPanel({
                   </span>
                 </div>
 
-                <p className="text-[9px] text-neutral-300 leading-normal font-medium">
-                  Accelerated spatial indexing and neural shape recognition for ultra-fast performance across thousands of objects.
-                </p>
+
 
                 {/* Smart Shape Detection Toggle */}
                 <label className="flex items-center justify-between cursor-pointer py-1 bg-neutral-900/40 px-2 rounded-lg border border-neutral-800/60">
                   <div className="flex flex-col">
                     <span className="text-[9px] text-neutral-200 font-bold">Smart Shape Detection</span>
-                    <span className="text-[7.5px] text-neutral-400">Auto-converts sketches to perfect circles, rectangles & stars</span>
+
                   </div>
                   <input
                     type="checkbox"
@@ -2065,85 +2033,93 @@ function LeftPanel({
               </div>
             )}
 
-            {/* 🎨 Premium Fill Bucket Configuration */}
+            {/* Fill & Erase Configuration */}
             {activeTool === 'FIL' && (
-              <div className="border border-emerald-500/30 bg-neutral-950/90 rounded-2xl p-3 space-y-3 shrink-0 shadow-lg animate-fade-in" id="fill-tool-panel">
+              <div className="border border-neutral-300 bg-white rounded-xl p-3 space-y-3 shrink-0 shadow-sm text-neutral-900 animate-fade-in" id="fill-tool-panel">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-emerald-400">
-                    {isFillEraseMode ? (
-                      <Eraser className="w-3.5 h-3.5 text-rose-400" />
-                    ) : (
-                      <PaintBucket className="w-3.5 h-3.5" />
-                    )}
-                    <span className={`text-[10px] font-black uppercase tracking-wider ${isFillEraseMode ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {isFillEraseMode ? 'Erase Fill Controls' : 'Fill Tool Controls'}
-                    </span>
+                  <div className="flex items-center gap-1.5 font-black uppercase text-[11px] tracking-wide text-neutral-900">
+                    <PaintBucket className="w-4 h-4 text-orange-500" />
+                    <span>Fill & Erase Controls</span>
                   </div>
                 </div>
 
-                {/* Mode Selector: Color Fill vs Erase / Remove Fill */}
-                <div className="grid grid-cols-2 gap-1.5 p-1 bg-neutral-900/80 rounded-xl border border-neutral-800">
+                {/* Mode Selector: Paint Fill vs Part Fill vs Drag Erase */}
+                <div className="grid grid-cols-3 gap-1 p-1 bg-neutral-100 rounded-lg border border-neutral-200">
                   <button
                     type="button"
-                    onClick={() => setIsFillEraseMode?.(false)}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[9px] font-bold uppercase transition-all cursor-pointer ${
-                      !isFillEraseMode 
-                        ? 'bg-emerald-600 text-white shadow-sm' 
-                        : 'text-neutral-400 hover:text-white hover:bg-neutral-800/50'
+                    onClick={() => {
+                      setFillSubMode?.('whole');
+                      setIsFillEraseMode?.(false);
+                    }}
+                    className={`py-1.5 px-2 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                      fillSubMode === 'whole' && !isFillEraseMode 
+                        ? 'bg-neutral-100 text-neutral-900 border border-neutral-300 shadow-sm font-black' 
+                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200'
                     }`}
                   >
-                    <PaintBucket className="w-3 h-3" />
                     Paint Fill
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsFillEraseMode?.(true)}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[9px] font-bold uppercase transition-all cursor-pointer ${
-                      isFillEraseMode 
-                        ? 'bg-rose-600 text-white shadow-sm' 
-                        : 'text-neutral-400 hover:text-white hover:bg-neutral-800/50'
+                    onClick={() => {
+                      setFillSubMode?.('part');
+                      setIsFillEraseMode?.(false);
+                    }}
+                    className={`py-1.5 px-2 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                      fillSubMode === 'part' 
+                        ? 'bg-neutral-100 text-neutral-900 border border-neutral-300 shadow-sm font-black' 
+                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200'
                     }`}
                   >
-                    <Eraser className="w-3 h-3" />
-                    Erase Fill
+                    Part Fill
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFillSubMode?.('drag_erase');
+                      setIsFillEraseMode?.(true);
+                    }}
+                    className={`py-1.5 px-2 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                      fillSubMode === 'drag_erase' || isFillEraseMode 
+                        ? 'bg-neutral-100 text-neutral-900 border border-neutral-300 shadow-sm font-black' 
+                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200'
+                    }`}
+                  >
+                    Drag Erase
                   </button>
                 </div>
 
-                {isFillEraseMode ? (
-                  <div className="p-2.5 bg-rose-950/30 border border-rose-500/30 rounded-xl space-y-2.5">
-                    <div className="flex items-center gap-1.5 text-rose-400">
-                      <Eraser className="w-3.5 h-3.5" />
-                      <span className="text-[9px] font-bold uppercase tracking-wider">Erase Fill Active</span>
+                {fillSubMode === 'drag_erase' || isFillEraseMode ? (
+                  <div className="p-2.5 bg-neutral-50 border border-neutral-200 rounded-xl space-y-2.5">
+                    <div className="space-y-1.5 bg-white p-2 rounded-lg border border-neutral-200">
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-neutral-600 font-bold">Erase Radius:</span>
+                        <span className="text-neutral-900 font-mono font-bold">{fillEraseRadius ?? 25}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={5}
+                        max={80}
+                        value={fillEraseRadius ?? 25}
+                        onChange={(e) => setFillEraseRadius?.(Number(e.target.value))}
+                        className="w-full accent-neutral-800 cursor-pointer"
+                      />
                     </div>
-                    <p className="text-[9px] text-neutral-300 leading-normal">
-                      Click directly on any <b>filled drawing</b> or <b>custom color area</b> on the canvas to erase and unfill it.
-                    </p>
                     <button
                       type="button"
                       onClick={removeColorFillFromSelected}
-                      className="w-full py-2 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-black uppercase text-[10px] rounded-xl tracking-wider shadow-lg shadow-rose-500/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      title="Remove fill from currently selected drawing"
+                      className="w-full py-2 bg-neutral-800 hover:bg-neutral-900 active:bg-black text-white font-black uppercase text-[10px] rounded-lg tracking-wider shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      title="Remove all fill from selected drawing"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      Remove Fill from Selected
+                      Remove All Fill from Selected
                     </button>
                   </div>
                 ) : (
                   <>
-                    <p className="text-[9px] text-neutral-400 leading-normal font-medium">
-                      Select a color and click on a <b>selected</b> drawing or enclosed area.
-                      <br />
-                      • <b>Closed Path:</b> Fills inner area (preserves stroke).
-                      <br />
-                      • <b>Open Path:</b> Color is applied directly to the stroke.
-                    </p>
-
                     {/* Apply Fill Forever Toggle */}
-                    <div className="flex items-center justify-between py-1.5 bg-neutral-900/40 px-2 rounded-xl border border-neutral-800/40">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-neutral-300 font-bold uppercase">Apply Fill Forever</span>
-                        <span className="text-[8px] text-neutral-500">Apply color to all frames on drawing</span>
-                      </div>
+                    <div className="flex items-center justify-between py-1.5 bg-neutral-50 px-2 rounded-lg border border-neutral-200">
+                      <span className="text-[9px] text-neutral-800 font-bold uppercase">Apply Fill Forever</span>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
@@ -2151,16 +2127,13 @@ function LeftPanel({
                           onChange={(e) => setApplyFillForever?.(e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-8 h-4 bg-neutral-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:border-neutral-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-white" />
+                        <div className="w-8 h-4 bg-neutral-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-neutral-800 peer-checked:after:bg-white" />
                       </label>
                     </div>
 
                     {/* Full Closed Fill Toggle */}
-                    <div className="flex items-center justify-between py-1.5 bg-neutral-900/40 px-2 rounded-xl border border-neutral-800/40">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-neutral-300 font-bold uppercase">Full Closed Fill</span>
-                        <span className="text-[8px] text-neutral-500">Fill nested inner shapes too</span>
-                      </div>
+                    <div className="flex items-center justify-between py-1.5 bg-neutral-50 px-2 rounded-lg border border-neutral-200">
+                      <span className="text-[9px] text-neutral-800 font-bold uppercase">Full Closed Fill</span>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
@@ -2168,7 +2141,7 @@ function LeftPanel({
                           onChange={(e) => setIgnoreInnerDrawings?.(!e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-8 h-4 bg-neutral-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:border-neutral-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-white" />
+                        <div className="w-8 h-4 bg-neutral-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-neutral-800 peer-checked:after:bg-white" />
                       </label>
                     </div>
 
@@ -2177,19 +2150,19 @@ function LeftPanel({
                       <button
                         type="button"
                         onClick={applyColorFillToSelected}
-                        className="py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black uppercase text-[9px] rounded-xl tracking-wider shadow-lg shadow-emerald-500/10 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        className="py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 active:bg-neutral-300 text-neutral-900 font-black uppercase text-[9px] rounded-lg tracking-wider shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer"
                         title="Apply fill color to selected drawing immediately"
                       >
-                        <CheckSquare className="w-3.5 h-3.5" />
+                        <CheckSquare className="w-3.5 h-3.5 text-neutral-900" />
                         Apply Fill
                       </button>
                       <button
                         type="button"
                         onClick={removeColorFillFromSelected}
-                        className="py-2 bg-neutral-900 hover:bg-rose-950/60 hover:border-rose-500/40 border border-neutral-700/60 active:bg-rose-900 text-neutral-300 hover:text-white font-black uppercase text-[9px] rounded-xl tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
-                        title="Remove and unfill selected drawing"
+                        className="py-2 bg-neutral-200 hover:bg-neutral-300 border border-neutral-300 active:bg-neutral-400 text-neutral-800 font-black uppercase text-[9px] rounded-lg tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        title="Remove all fill from selected drawing"
                       >
-                        <Eraser className="w-3.5 h-3.5 text-rose-400" />
+                        <Eraser className="w-3.5 h-3.5 text-neutral-700" />
                         Remove Fill
                       </button>
                     </div>
@@ -2197,7 +2170,7 @@ function LeftPanel({
                     {/* Color Selection HUD */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] text-neutral-500 font-extrabold uppercase tracking-widest">Active Fill Color</span>
+                        <span className="text-[9px] text-neutral-600 font-extrabold uppercase tracking-widest">Active Fill Color</span>
                       </div>
                       <CustomColorPicker
                         color={fillToolColor || '#4CAF50'}
@@ -2211,7 +2184,7 @@ function LeftPanel({
                             onClick={() => setFillToolColor?.(swatch)}
                             style={{ backgroundColor: swatch }}
                             className={`w-full h-4 rounded-md transition-all border ${
-                              fillToolColor === swatch ? 'border-white scale-110 shadow' : 'border-transparent hover:scale-105'
+                              fillToolColor === swatch ? 'border-neutral-950 scale-110 shadow' : 'border-transparent hover:scale-105'
                             }`}
                             title={swatch}
                           />
@@ -2226,25 +2199,19 @@ function LeftPanel({
             {/* 360° Studio Creation Center */}
             {activeTool === '360' && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 space-y-3.5 animate-fade-in shrink-0">
-                <div className="flex items-center gap-1.5 text-amber-400 justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-300 justify-between">
                   <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+                    <Compass className="w-4 h-4 text-neutral-300 shrink-0" />
                     <span className="text-[10px] font-black uppercase tracking-wider">360° Pseudo-3D Studio</span>
                   </div>
                 </div>
 
                 {!is360WizardActive ? (
                   <div className="space-y-3">
-                    <p className="text-[10px] text-neutral-400 font-medium leading-normal">
-                      Turn standard 2D layers into fully rotating characters. Select drawings manually or use our smart step-by-step drawing wizard!
-                    </p>
-
                     {/* Interactive Wizard Start */}
                     <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-2.5 text-center space-y-2">
-                      <span className="text-[9px] text-amber-400 font-bold block">⭐ Interactive Co-Location Wizard</span>
-                      <p className="text-[9px] text-neutral-400 leading-snug">
-                        Draw your viewpoints (Front, Side, Back, etc.) one by one at the exact same spot. Wizard hides previous drawings and provides <b>onion skin guides</b> automatically!
-                      </p>
+                      <span className="text-[9px] text-amber-400 font-bold block">Interactive Co-Location Wizard</span>
+
                       <button
                         onClick={() => {
                           if (start360Wizard) {
@@ -2255,7 +2222,7 @@ function LeftPanel({
                         }}
                         className="w-full bg-amber-500 hover:bg-amber-600 text-neutral-950 text-[10px] font-black py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer shadow-md"
                       >
-                        🚀 Launch Drawing Wizard
+                        Launch Drawing Wizard
                       </button>
                     </div>
 
@@ -2428,11 +2395,9 @@ function LeftPanel({
                       ) : (
                         <div className="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center space-y-1.5 text-neutral-400">
                           <p className="text-[10px] font-bold text-neutral-300">
-                            ✍️ Ready for "{customViewName}" ({customViewAngle}°)
+                            Ready for "{customViewName}" ({customViewAngle}°)
                           </p>
-                          <p className="text-[9px] leading-relaxed text-neutral-500">
-                            Draw the model at this viewpoint exactly at the same location as previous drawings. Then, select the drawing on the canvas to register it!
-                          </p>
+
                           <div className="flex justify-center gap-1.5 mt-1">
                             <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[8px] font-mono text-neutral-500">
                               Brush/Pen/Upload
@@ -2500,7 +2465,7 @@ function LeftPanel({
                         className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-neutral-950 font-black py-2 rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-amber-500/10"
                         disabled={draft360Views.length === 0}
                       >
-                        💫 Convert to 360° Object ({draft360Views.length} views)
+                        Convert to 360° Object ({draft360Views.length} views)
                       </button>
                     </div>
                   </div>
@@ -2508,7 +2473,7 @@ function LeftPanel({
               </div>
             )}
 
-            {/* 📦 3D Models & Shapes Library */}
+            {/* 3D Models & Shapes Library */}
             <div className="border border-neutral-800/80 bg-neutral-900/50 rounded-2xl p-3 space-y-3.5 shrink-0">
               <button 
                 type="button"
@@ -2517,21 +2482,19 @@ function LeftPanel({
               >
                 <div className="flex items-center gap-1.5">
                   <Box className="w-3.5 h-3.5" />
-                  <span>💫 2D to 3D Extrusion Engine</span>
+                  <span>2D to 3D Extrusion Engine</span>
                 </div>
                 <span>{is3DLibraryOpen ? '▼' : '▶'}</span>
               </button>
 
               {is3DLibraryOpen && (
                 <div className="space-y-3.5 animate-fade-in">
-                  <p className="text-[10px] text-neutral-400 leading-normal">
-                    Draw freely on the canvas using our 2D brush or pen tool, select your drawing, and instantly convert it into a solid 3D mesh proxy!
-                  </p>
+
 
                   {/* Daily Conversion Limit & Info Card */}
                   <div className="bg-neutral-950 rounded-xl p-3 border border-neutral-850 space-y-2">
                     <div className="flex items-center justify-between text-[9px] font-extrabold uppercase tracking-wider text-neutral-400">
-                      <span>💫 Daily 3D Limit</span>
+                      <span>Daily 3D Limit</span>
                       <span className="text-amber-400 font-mono text-[10px] font-bold">
                         {getDailyLimitStatus(currentUser || 'guest').count} / 10 Used
                       </span>
@@ -2542,9 +2505,6 @@ function LeftPanel({
                         style={{ width: `${Math.min(100, (getDailyLimitStatus(currentUser || 'guest').count / 10) * 100)}%` }}
                       />
                     </div>
-                    <p className="text-[9px] text-neutral-500 leading-normal">
-                      Select any drawing or custom shape and click <b>💫 Convert to 3D</b> in the properties panel to convert it into a real 3D solid model.
-                    </p>
                   </div>
 
 
@@ -2561,7 +2521,7 @@ function LeftPanel({
               </div>
               {rootObjects.length === 0 ? (
                 <div className="text-center py-8 text-xs text-neutral-600 font-bold border border-dashed border-neutral-800/80 rounded-2xl p-4">
-                  Draw or upload PNG to begin. Drag items to parent them recursively!
+                  No drawings on canvas
                 </div>
               ) : (
                 rootObjects.map(obj => renderTreeItem(obj, 0))

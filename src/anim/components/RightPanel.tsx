@@ -29,7 +29,6 @@ import {
   Square as SquareIcon,
   Layers,
   Workflow,
-  Sparkles,
   Feather,
   GitMerge,
   Maximize2,
@@ -41,7 +40,6 @@ import {
   Clock,
   Pause,
   Square,
-  Zap,
   Info,
   Box,
   Palette,
@@ -51,12 +49,13 @@ import {
   Activity,
   GitCommit,
   RotateCcw,
-  Wand2,
   Grid,
   Edit3,
   CircleDot,
   Sliders,
-  PenTool
+  PenTool,
+  Spline,
+  PaintBucket
 } from 'lucide-react';
 import { calculateCustomVectorDeformedPoints, calculateRigidLinearDeformedPoints, bindVPRPointsToDrawing } from '../utils/vectorDeform';
 import { VectorObject, Bone, Layer, Pivot, Transform, Point, Frame, RealismSettings, VSTState, SmartCorrectState, SmartWarpState, BrushSettings, LiquifyBrushSettings, SubExtrusion, CustomVectorDeformNode, PointShapeState, PointShapeNode, SculptBrushState, LineEditState, LineEditNode } from '../types';
@@ -1640,7 +1639,7 @@ function RightPanel({
       });
     });
 
-    setGapFillFeedback(`✨ Deep Gap Analysis Complete: Sealed and filled all gaps in ${count} drawing(s)!`);
+    setGapFillFeedback(` Deep Gap Analysis Complete: Sealed and filled all gaps in ${count} drawing(s)!`);
     setTimeout(() => setGapFillFeedback(null), 4000);
   };
 
@@ -3205,7 +3204,7 @@ function RightPanel({
           open ? 'w-80' : 'w-0'
         }`}
       >
-        <div className={`pointer-events-auto w-full h-full bg-neutral-900/95 backdrop-blur-md border-l-2 border-neutral-800 flex flex-col overflow-hidden box-border min-w-0 ${
+        <div className={`pointer-events-auto w-full h-full bg-neutral-900/95 border-l-2 border-neutral-800 flex flex-col overflow-hidden box-border min-w-0 ${
           open ? 'w-80' : 'w-0 border-l-0'
         }`}>
         {open && (
@@ -3328,15 +3327,13 @@ function RightPanel({
               {/* Collapsed view toggle when inactive and idle */}
               {!autoFramesActive && autoFramesStatus === 'idle' ? (
                 <div className="space-y-2.5 pt-1">
-                  <p className="text-xs text-neutral-300 font-bold leading-relaxed">
-                    Automatically create frames at timed intervals as you transform drawings on the canvas.
-                  </p>
+                  
                   <button
                     type="button"
                     onClick={onOpenAutoFrames}
                     className="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-black text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-lg active:scale-95 border-2 border-amber-300"
                   >
-                    <Sparkles className="w-5 h-5 stroke-[2.5]" />
+                    <Play className="w-5 h-5 stroke-[2.5]" />
                     Activate Auto Frames
                   </button>
                 </div>
@@ -3352,9 +3349,7 @@ function RightPanel({
                       <div className="text-5xl font-black text-amber-400 font-mono animate-bounce">
                         {autoFramesCountdown}
                       </div>
-                      <p className="text-xs text-neutral-300 font-bold">
-                        Grab canvas handles to transform drawing!
-                      </p>
+                      
                       {onStopAutoFrames && (
                         <button
                           type="button"
@@ -3401,7 +3396,7 @@ function RightPanel({
                       <div className="flex items-center justify-between py-1.5 px-3 rounded-xl bg-neutral-900 border-2 border-neutral-800 text-xs sm:text-sm">
                         <span className="text-neutral-300 font-bold">Timeline Frame:</span>
                         <span className="font-mono font-black text-amber-300">
-                          #{currentFrameIndex + 1} / {totalFrames}
+                          {currentFrameIndex + 1} / {totalFrames}
                         </span>
                       </div>
 
@@ -3636,9 +3631,7 @@ function RightPanel({
                   </button>
                 </div>
 
-                <p className="text-[10px] text-neutral-400 leading-normal font-semibold">
-                  Draw multiple separate lines on the canvas; they will automatically be grouped into a single drawing object instead of separate strokes.
-                </p>
+                
 
                 {continuousDrawActive && (
                   <div className="bg-neutral-950/40 p-3 rounded-xl border border-neutral-850 space-y-2.5 animate-fade-in text-[10px] text-neutral-300 font-bold font-mono">
@@ -3771,7 +3764,7 @@ function RightPanel({
               <div className="space-y-4 bg-amber-500/10 p-4 rounded-2xl border border-amber-500/30 shadow-lg shadow-black/30">
                 <div className="flex items-center justify-between border-b border-amber-500/20 pb-2.5">
                   <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 font-mono animate-pulse">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <Layers className="w-4 h-4 text-amber-400" />
                     Multi-Drawing Lasso Transform
                   </span>
                   <div className="flex items-center flex-wrap gap-1.5">
@@ -3870,11 +3863,7 @@ function RightPanel({
                   <div className="font-bold text-amber-400 flex items-center gap-1 font-mono">
                     <Info className="w-3.5 h-3.5" /> Lasso Region Active
                   </div>
-                  <p className="text-neutral-400">
-                    {lassoAllFrames 
-                      ? "Transforming all vertices inside the lasso simultaneously across all frames."
-                      : "Transforming all vertices inside the lasso on the current frame only (Keyframeable Animation)."}
-                  </p>
+                  
                   <div className="flex gap-2 pt-1 font-mono text-[9px] text-neutral-400">
                     <span>Drawings: <strong className="text-amber-400 font-bold">{Object.keys(globalLassoSelectedMap).length}</strong></span>
                     <span>•</span>
@@ -3931,7 +3920,7 @@ function RightPanel({
               <div className="space-y-4 bg-violet-500/10 p-4 rounded-2xl border border-violet-500/30 shadow-lg shadow-black/30">
                 <div className="flex items-center justify-between border-b border-violet-500/20 pb-2.5">
                   <span className="text-xs font-black uppercase tracking-wider text-violet-400 flex items-center gap-1.5 font-mono animate-pulse">
-                    <Sparkles className="w-4 h-4 text-violet-400" />
+                    <Scissors className="w-4 h-4 text-violet-400" />
                     Adjustable Selection (FSL)
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -3965,9 +3954,7 @@ function RightPanel({
                   <div className="font-bold text-violet-400 flex items-center gap-1 font-mono">
                     <Info className="w-3.5 h-3.5" /> Free Selection Active
                   </div>
-                  <p className="text-neutral-400">
-                    You can drag the control points to adjust the area, drag the background to move it, or insert new points by clicking on the edges.
-                  </p>
+                  
                   <div className="flex justify-between items-center pt-2 border-t border-neutral-800/40">
                     <span className="font-mono text-[9px] text-neutral-400">Points: <strong className="text-violet-400 font-bold">{fslPoints.length}</strong></span>
                   </div>
@@ -4039,7 +4026,7 @@ function RightPanel({
                       }`}
                       title="Interactive Sculpt Brush to push, smooth, or inflate contours quickly"
                     >
-                      <span>🖌️ Brush</span>
+                      <span> Brush</span>
                     </button>
                     <button
                       type="button"
@@ -4061,7 +4048,7 @@ function RightPanel({
                   <div className="space-y-2.5 bg-amber-500/10 p-3 rounded-xl border border-amber-500/25 animate-fade-in">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 font-mono flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <Feather className="w-3.5 h-3.5" />
                         Sculpt & Smooth Brush
                       </span>
                       <span className="text-[9px] font-mono font-bold text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded-md border border-amber-500/30">
@@ -4157,7 +4144,7 @@ function RightPanel({
                     }`}
                   >
                     <span>Topology:</span>
-                    <span>{pointShapeState.isClosed ? '⬡ Closed' : '〰 Open'}</span>
+                    <span>{pointShapeState.isClosed ? 'Closed' : ' Open'}</span>
                   </button>
 
                   <button
@@ -4170,7 +4157,7 @@ function RightPanel({
                     }`}
                   >
                     <span>Points:</span>
-                    <span>{pointShapeState.showPoints ? '👁️ Shown' : '🕶️ Hidden'}</span>
+                    <span>{pointShapeState.showPoints ? ' Shown' : ' Hidden'}</span>
                   </button>
                 </div>
 
@@ -4269,7 +4256,7 @@ function RightPanel({
                     className="py-1.5 px-2 rounded-xl bg-neutral-850 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 text-[10px] font-black uppercase tracking-wider transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer text-center"
                     title="Smooth vertex curves"
                   >
-                    ✨ Smooth
+                     Smooth
                   </button>
                 </div>
 
@@ -4278,7 +4265,7 @@ function RightPanel({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-mono flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-amber-400" />
+                        <Box className="w-3 h-3 text-amber-400" />
                         Low-Poly Mode
                       </span>
                     </div>
@@ -4428,8 +4415,8 @@ function RightPanel({
                       disabled={!pointShapeState.nodes || pointShapeState.nodes.length <= 3}
                       className="w-full py-1.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 text-[10px] font-black uppercase tracking-wider transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <Zap className="w-3 h-3 text-amber-400" />
-                      ⚡ Decimate Current ({pointShapeState.nodes?.length || 0} nodes)
+                      <Scissors className="w-3 h-3 text-amber-400" />
+                       Decimate Current ({pointShapeState.nodes?.length || 0} nodes)
                     </button>
                   </div>
                 </div>
@@ -4552,13 +4539,13 @@ function RightPanel({
               </div>
             )}
 
-            {/* 〰️ LINE SHAPE EDIT (LIN) TOOL PANEL */}
+            {/*  LINE SHAPE EDIT (LIN) TOOL PANEL */}
             {activeTool === 'LIN' && lineEditState && setLineEditState && (
               <div className="space-y-4 bg-cyan-500/5 p-4 rounded-2xl border border-cyan-500/20 shadow-lg shadow-black/20 animate-fade-in">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-cyan-500/10 pb-2.5">
                   <span className="text-xs font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 font-mono">
-                    <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                    <Edit3 className="w-4 h-4 text-cyan-400" />
                     Line Shape Edit (LIN)
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
@@ -4574,9 +4561,7 @@ function RightPanel({
                       {selectedObject ? selectedObject.name : 'Click any drawing on canvas'}
                     </span>
                   </div>
-                  <p className="text-[10px] text-neutral-400 leading-relaxed">
-                    The line snaps <strong className="text-cyan-300">directly onto the drawing's exact stroke</strong>. Drag anywhere on the line to reshape circles, curves, and complex strokes organically.
-                  </p>
+                  
                 </div>
 
                 {/* Mode Selector */}
@@ -4620,9 +4605,7 @@ function RightPanel({
                       </span>
                     </div>
 
-                    <p className="text-[9px] text-neutral-300 leading-normal">
-                      Click directly on any drawing stroke, mesh, or PNG image to drop custom points. Drag points or line segments to extrude, pull out, or push in area with high precision.
-                    </p>
+                    
 
                     <div className="grid grid-cols-2 gap-1.5">
                       <button
@@ -4688,7 +4671,7 @@ function RightPanel({
                         }}
                         className="w-full py-1.5 bg-cyan-500 hover:bg-cyan-400 text-neutral-950 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md"
                       >
-                        ⚡ Apply Extrude to Selected Area
+                         Apply Extrude to Selected Area
                       </button>
                     )}
 
@@ -4764,7 +4747,7 @@ function RightPanel({
                         className="py-2 px-2.5 rounded-xl bg-neutral-850 hover:bg-neutral-800 border border-neutral-700 text-cyan-300 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer text-center flex items-center justify-center gap-1"
                         title="Smooth out sharp bends or bumps along the stroke"
                       >
-                        ✨ Smooth Curves
+                         Smooth Curves
                       </button>
 
                       <button
@@ -4806,14 +4789,14 @@ function RightPanel({
                       className="w-full py-1.5 px-2 rounded-xl bg-neutral-850 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer text-center"
                       title="Simplify stroke vertices to clean up jagged paths"
                     >
-                      🧹 Clean & Resample Stroke
+                       Clean & Resample Stroke
                     </button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* 🎭 SWAP STUDIO (SWP) PANEL - ALWAYS VISIBLE WHEN SWAP STUDIO TOOL IS ACTIVE, REGARDLESS OF SELECTION STATE */}
+            {/*  SWAP STUDIO (SWP) PANEL - ALWAYS VISIBLE WHEN SWAP STUDIO TOOL IS ACTIVE, REGARDLESS OF SELECTION STATE */}
             {(activeTool === 'SWAP_STUDIO' || activeTool === 'SWP' || activeTool === 'SST') && (() => {
               // Collect all registered swap parts from all canvas objects
               const allObjects = Object.values(objects);
@@ -4983,20 +4966,14 @@ function RightPanel({
                             <Plus className="w-4 h-4" />
                             Add Selected Drawing to Swap Studio
                           </button>
-                        ) : (
-                          <p className="text-[10.5px] text-emerald-800 font-medium bg-emerald-100/60 p-2 rounded-lg">
-                            ✓ This drawing is registered as a swapable part. Control its rotation, visibility, or detachment below.
-                          </p>
-                        )}
+                        ) : null}
                       </div>
                     ) : (
                       <div className="p-4 bg-neutral-50 rounded-xl border border-dashed border-neutral-300 text-center space-y-1.5">
                         <span className="text-xs font-bold text-neutral-700 block">
                           No Drawing Selected
                         </span>
-                        <p className="text-[10.5px] text-neutral-500 leading-relaxed">
-                          Click any drawing on the canvas to select it, then click <strong>Add Selected Drawing</strong>.
-                        </p>
+                        
                       </div>
                     )}
                   </div>
@@ -5082,7 +5059,7 @@ function RightPanel({
                                       : 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300 border border-neutral-300'
                                   }`}
                                 >
-                                  {isVisible ? '👁️ Visible' : '🚫 Hidden'}
+                                  {isVisible ? ' Visible' : 'Hidden'}
                                 </button>
                               </div>
                             </div>
@@ -5201,10 +5178,8 @@ function RightPanel({
 
                   {/* Position Lock & Stability Badge */}
                   <div className="p-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-[9px] text-neutral-600 space-y-0.5">
-                    <span className="font-bold text-neutral-800 block">🔒 Position Anchor & Drawing Stability:</span>
-                    <p>
-                      Drawings remain stable and anchored to their relative positions. You can select, unselect, reposition, rotate, and toggle visibility at any time across all tools.
-                    </p>
+                    <span className="font-bold text-neutral-800 block">Position Anchor & Drawing Stability:</span>
+                    
                   </div>
                 </div>
               );
@@ -5274,11 +5249,7 @@ function RightPanel({
                       )}
                     </button>
 
-                    <p className="text-[9.5px] text-neutral-400 leading-tight">
-                      {selectedObject.isLocked
-                        ? '🔒 This drawing is locked on its layer. It cannot be moved, colored, or modified until unlocked.'
-                        : '🔓 This drawing is unlocked. All drawing tools, deformations, and styling features apply strictly.'}
-                    </p>
+                    
                   </div>
                 )}
 
@@ -5297,7 +5268,7 @@ function RightPanel({
                   <div className="space-y-4 bg-amber-500/5 p-4 rounded-2xl border border-amber-500/20 shadow-lg shadow-black/20">
                     <div className="flex items-center justify-between border-b border-amber-500/10 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 font-mono">
-                        <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                        <Layers className="w-4 h-4 text-amber-400" />
                         Lasso Deform Selection
                       </span>
                       <button
@@ -5341,7 +5312,7 @@ function RightPanel({
                             : 'text-neutral-400 hover:text-neutral-200'
                         }`}
                       >
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <Spline className="w-3.5 h-3.5" />
                         Freehand Lasso
                       </button>
                       <button
@@ -5360,64 +5331,53 @@ function RightPanel({
                       </button>
                     </div>
 
-                    {/* Short instruction HUD */}
-                    <div className="bg-neutral-900/40 border border-neutral-800/40 rounded-xl p-3 text-[10.5px] leading-relaxed text-neutral-300 space-y-2">
-                      <div className="font-bold text-amber-400 flex items-center gap-1 font-mono">
-                        <Info className="w-3.5 h-3.5 animate-bounce" /> Guide: Lasso Selection Deform
-                      </div>
-                      <p>
-                        1. Select the <strong className="text-amber-400">Lasso tool (Sparkles)</strong> on the left toolbar and draw a closed region over the canvas.
-                      </p>
-                      <p>
-                        2. Click <span className="text-white font-semibold">"Set Selected Region"</span> to assign the lasso area to this drawing.
-                      </p>
-                      <p>
-                        3. Click <span className="text-white font-semibold">"APPLY TO LASSO"</span> above to transform ONLY the selected area using the sliders below.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
-                      {/* Controls Row */}
+                    {/* Controls Row */}
+                    <div className="space-y-3 pt-2">
                       <div className="flex gap-2">
                         <button
                           id="set-lasso-deform-region"
                           disabled={lassoPoints.length === 0}
                           onClick={() => {
                             // Find local center pivot of the selected object
-                            const localPivot = selectedObject.pivots[0] || { localX: 0, localY: 0 };
-                            // Convert world lassoPoints to local coordinates of the selected object
-                            const localLassoPoints = lassoPoints.map(wp => worldToLocal(wp, selectedObject.transform, localPivot));
-                            
-                            const newDeformState = {
+                            const pivot = selectedObject.pivots[0] || { localX: 0, localY: 0 };
+                            const updatedState = {
                               active: true,
-                              lassoPoints: localLassoPoints,
+                              lassoPoints: lassoPoints.map(pt => toLocalCoord(pt, selectedObject.transform, pivot)),
                               transform: selectedObject.lassoDeformState?.transform || {
-                                x: 0, y: 0, rotation: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0, rotateX: 0, rotateY: 0, perspective: 0
+                                x: 0,
+                                y: 0,
+                                rotation: 0,
+                                scaleX: 1,
+                                scaleY: 1,
+                                skewX: 0,
+                                skewY: 0,
+                                rotateX: 0,
+                                rotateY: 0,
+                                perspective: 0
                               }
                             };
                             updateObject(selectedObject.id, {
-                              lassoDeformState: newDeformState
+                              lassoDeformState: updatedState
                             });
-                            setFrames(prev => prev.map((frame, idx) => {
-                              if (idx !== currentFrameIndex) return frame;
-                              if (!frame.objects || !frame.objects[selectedObject.id]) return frame;
-                              return {
-                                ...frame,
-                                objects: {
-                                  ...frame.objects,
-                                  [selectedObject.id]: {
-                                    ...frame.objects[selectedObject.id],
-                                    lassoDeformState: newDeformState
+                            setFrames(prev => prev.map((f, fIdx) => 
+                              fIdx !== currentFrameIndex || !f.objects || !f.objects[selectedObject.id]
+                                ? f
+                                : {
+                                    ...f,
+                                    objects: {
+                                      ...f.objects,
+                                      [selectedObject.id]: {
+                                        ...f.objects[selectedObject.id],
+                                        lassoDeformState: updatedState
+                                      }
+                                    }
                                   }
-                                }
-                              };
-                            }));
+                            ));
                           }}
                           className="flex-1 py-2 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white text-[10px] font-black rounded-lg transition-all uppercase tracking-wider disabled:opacity-30 disabled:pointer-events-none"
                         >
                           Set Selected Region ({lassoPoints.length} PTS)
                         </button>
-
                         {(selectedObject.lassoDeformState?.lassoPoints?.length ?? 0) > 0 && (
                           <button
                             onClick={() => {
@@ -5433,13 +5393,10 @@ function RightPanel({
                         )}
                       </div>
 
-                      {/* Display current region status */}
                       <div className="flex items-center justify-between text-[10px] bg-neutral-900/40 px-3 py-2 rounded-xl border border-neutral-800/40">
                         <span className="text-neutral-400 font-mono">Assigned Region:</span>
                         <span className="text-neutral-200 font-bold font-mono">
-                          {selectedObject.lassoDeformState?.lassoPoints 
-                            ? `${selectedObject.lassoDeformState.lassoPoints.length} Points` 
-                            : 'None'}
+                          {selectedObject.lassoDeformState?.lassoPoints ? `${selectedObject.lassoDeformState.lassoPoints.length} Points` : 'None'}
                         </span>
                       </div>
                     </div>
@@ -5451,16 +5408,14 @@ function RightPanel({
                   <div className="space-y-4 bg-amber-500/5 p-4 rounded-2xl border border-amber-400/20 shadow-lg shadow-black/20">
                     <div className="flex items-center justify-between border-b border-amber-500/10 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
+                        <Grid className="w-4 h-4 text-amber-500" />
                         MESH TRANSFORM OPTIONS
                       </span>
                     </div>
 
                     {!selectedObject.meshState ? (
                       <div className="space-y-3">
-                        <p className="text-[10px] text-neutral-400 leading-normal font-bold">
-                          Create a 2D control point mesh to wrap and warp this object's geometry fluidly!
-                        </p>
+                        
                         <div className="space-y-1.5">
                           <label className="text-[10px] text-neutral-400 block font-black uppercase tracking-wide">Grid Density Preset:</label>
                           <div className="grid grid-cols-3 gap-1.5">
@@ -5690,7 +5645,7 @@ function RightPanel({
                               className="accent-amber-500 rounded border-neutral-800 mt-0.5"
                             />
                             <div className="flex flex-col gap-0.5">
-                              <span className="text-amber-400 font-extrabold uppercase text-[10px] tracking-wider">⚡ Extrude Point / Branch Mode</span>
+                              <span className="text-amber-400 font-extrabold uppercase text-[10px] tracking-wider"> Extrude Point / Branch Mode</span>
                               <span className="text-[9px] text-neutral-300 font-normal leading-normal">
                                 Click & drag any mesh point or stroke vertex to pull out a new connected stroke branch from the drawing!
                               </span>
@@ -5774,16 +5729,14 @@ function RightPanel({
                   <div className="space-y-4 bg-cyan-500/5 p-4 rounded-2xl border border-cyan-400/20 shadow-lg shadow-black/20">
                     <div className="flex items-center justify-between border-b border-cyan-500/10 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-cyan-500 animate-pulse" />
+                        <Workflow className="w-4 h-4 text-cyan-500" />
                         SPLINE RESHAPE SYSTEM
                       </span>
                     </div>
 
                     {!selectedObject.splineActive ? (
                       <div className="space-y-3 text-xs">
-                        <p className="text-[10px] text-neutral-400 leading-normal font-bold">
-                          Convert target vectors into a parametric Bezier curve to deform, stretch, rotate, and twist vectors along the curve dynamically!
-                        </p>
+                        
                         <div className="space-y-1.5">
                           <label className="text-[10px] text-neutral-400 block font-black uppercase tracking-wide">Spline Density Preset:</label>
                           <div className="grid grid-cols-3 gap-1.5">
@@ -6038,19 +5991,17 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing or uploaded PNG image on the canvas first, then draw a freeform boundary around the isolated part to transform!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : (
                       <div className="space-y-3 text-xs">
                         <div className="bg-neutral-900/80 p-2.5 rounded-xl border border-indigo-500/30 space-y-1.5">
                           <div className="flex items-center gap-1.5 text-indigo-300 text-[10px] font-bold">
-                            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                            <Scissors className="w-3.5 h-3.5 text-indigo-400" />
                             <span>Strict Pixel Isolation Engine</span>
                           </div>
-                          <p className="text-[10px] text-neutral-400 leading-relaxed">
-                            Draw a boundary loop over the exact part (e.g. hair, arm, face). Transforms will apply <strong className="text-white">strictly to that isolated part</strong> while all other pixels stay <strong className="text-indigo-400">100% frozen as-is</strong>!
-                          </p>
+                          
                         </div>
 
                         {/* 3D Flip Mirror & Quick Actions */}
@@ -6067,7 +6018,7 @@ function RightPanel({
                               }`}
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
-                              Flip Mirror X {selectedObject.vstState?.transform?.mirrorX ? '✓ ON' : ''}
+                              Flip Mirror X {selectedObject.vstState?.transform?.mirrorX ? 'ON' : ''}
                             </button>
                             <button
                               type="button"
@@ -6079,7 +6030,7 @@ function RightPanel({
                               }`}
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
-                              Flip Mirror Y {selectedObject.vstState?.transform?.mirrorY ? '✓ ON' : ''}
+                              Flip Mirror Y {selectedObject.vstState?.transform?.mirrorY ? 'ON' : ''}
                             </button>
                           </div>
                         </div>
@@ -6151,15 +6102,13 @@ function RightPanel({
                   <div className="space-y-4 bg-amber-950/20 p-4 rounded-2xl border border-amber-400/30 shadow-lg shadow-black/20 animate-fade-in" id="sct-settings-panel">
                     <div className="flex items-center justify-between border-b border-amber-500/20 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                        <Sliders className="w-4 h-4 text-amber-400" />
                         SMART CORRECT TOOL (SCT)
                       </span>
                     </div>
 
                     <div className="space-y-3 text-xs">
-                      <p className="text-[10px] text-neutral-400 leading-relaxed font-bold">
-                        Correct contours, shapes, circles, lines, or PNG edges cleanly. Move the capture dot over the contour and drag to adjust!
-                      </p>
+                      
 
                       {/* Mode Selector: Expand, Decrease, Move */}
                       <div className="space-y-1.5">
@@ -6246,9 +6195,7 @@ function RightPanel({
                       </span>
                     </div>
                     <div className="space-y-2 text-xs">
-                      <p className="text-[10px] text-neutral-400 leading-relaxed font-bold">
-                        Strictly creates crisp, fixed straight vector lines in real-time without broken strokes, bending, or line jitter.
-                      </p>
+                      
                     </div>
                   </div>
                 )}
@@ -6264,14 +6211,12 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing on the canvas first to place deformation pins!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : !selectedObject.smartWarp ? (
                       <div className="space-y-3">
-                        <p className="text-[10px] text-neutral-400 leading-normal font-bold">
-                          Add custom warp pins directly onto your drawing! Drag pins to deform the body part smoothly. This offers extremely precise puppet-like control with zero mesh clutter.
-                        </p>
+                        
                         <button
                           onClick={() => handleInitSmartWarp(selectedObject)}
                           className="w-full py-2 bg-sky-500 text-neutral-950 hover:bg-sky-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
@@ -6338,9 +6283,9 @@ function RightPanel({
                             <span className="font-bold uppercase tracking-wider">Active Warp Pins ({selectedObject.smartWarp.pins.length})</span>
                           </div>
                           {selectedObject.smartWarp.pins.length === 0 ? (
-                            <p className="text-[10px] text-neutral-500 italic">
-                              Click anywhere directly on the drawing to add warp pins!
-                            </p>
+                            <div className="p-2 text-center text-[10px] text-neutral-500 font-bold">
+                              No pins placed yet
+                            </div>
                           ) : (
                             <div className="space-y-1 max-h-24 overflow-y-auto bg-neutral-950/60 rounded-xl border border-neutral-800/40 p-1.5 scrollbar-thin">
                               {selectedObject.smartWarp.pins.map((pin, pIdx) => (
@@ -6355,7 +6300,7 @@ function RightPanel({
                                       className="p-0.5 hover:text-sky-400 text-neutral-500 transition-colors"
                                       title={pin.locked ? "Unlock Pin" : "Lock Pin Position"}
                                     >
-                                      {pin.locked ? '🔒' : '🔓'}
+                                      {pin.locked ? <Lock className="w-3 h-3 text-sky-400" /> : <Unlock className="w-3 h-3" />}
                                     </button>
                                     <button
                                       onClick={() => handleDeletePin(pin.id)}
@@ -6400,7 +6345,7 @@ function RightPanel({
                               }}
                               className="py-1.5 bg-sky-500 text-neutral-950 hover:bg-sky-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider text-center"
                             >
-                              ✓ Complete
+                              Complete
                             </button>
                           </div>
                         </div>
@@ -6420,14 +6365,12 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing or uploaded PNG on the canvas first to place puppet pins!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : (
                       <div className="space-y-4 text-xs">
-                        <p className="text-[10px] text-neutral-400 leading-normal font-bold">
-                          Click anywhere directly on the drawing or uploaded PNG to place deformation pins. Drag these pins on the canvas using the <strong>PIN</strong> or <strong>SEL</strong> tool to smoothly warp and stretch the artwork!
-                        </p>
+                        
 
                         {/* Active Pins List */}
                         <div className="space-y-2 border-t border-neutral-800/40 pt-2.5">
@@ -6435,9 +6378,9 @@ function RightPanel({
                             <span className="font-bold uppercase tracking-wider">Active Puppet Pins ({(selectedObject.pins || []).length})</span>
                           </div>
                           {(!selectedObject.pins || selectedObject.pins.length === 0) ? (
-                            <p className="text-[10px] text-neutral-500 italic">
-                              No pins placed yet. Click on the drawing to add your first puppet pin!
-                            </p>
+                            <div className="p-2 text-center text-[10px] text-neutral-500 font-bold">
+                              No pins placed yet
+                            </div>
                           ) : (
                             <div className="space-y-1 max-h-32 overflow-y-auto bg-neutral-950/60 rounded-xl border border-neutral-800/40 p-1.5 scrollbar-thin">
                               {selectedObject.pins.map((pin, pIdx) => {
@@ -6458,7 +6401,7 @@ function RightPanel({
                                         className="p-0.5 hover:text-red-400 text-neutral-500 transition-colors"
                                         title={pin.locked ? "Unlock Pin" : "Lock Pin Position"}
                                       >
-                                        {pin.locked ? '🔒' : '🔓'}
+                                        {pin.locked ? <Lock className="w-3 h-3 text-red-400" /> : <Unlock className="w-3 h-3" />}
                                       </button>
                                       <button
                                         onClick={() => {
@@ -6513,7 +6456,7 @@ function RightPanel({
                             }}
                             className="w-full py-1.5 bg-red-500 text-neutral-950 hover:bg-red-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider text-center"
                           >
-                            ✓ Complete
+                            Complete
                           </button>
                         </div>
                       </div>
@@ -6532,14 +6475,12 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing on the canvas first to activate cage deformation!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : !selectedObject.cageState || !selectedObject.cageState.active ? (
                       <div className="space-y-3">
-                        <p className="text-[10px] text-neutral-400 leading-normal font-bold">
-                          Create an outer boundary control cage (8 handles) surrounding your selected object. Moving handles deforms the entire shape smoothly like a modern high-end vector program!
-                        </p>
+                        
                         <button
                           onClick={() => handleInitCage(selectedObject)}
                           className="w-full py-2 bg-emerald-500 text-neutral-950 hover:bg-emerald-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
@@ -6567,9 +6508,7 @@ function RightPanel({
                           <div className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
                             Control Handles ({selectedObject.cageState.points.length})
                           </div>
-                          <p className="text-[10px] text-neutral-500 italic">
-                            Drag any green corner or edge handle on the canvas to deform your shape in real-time!
-                          </p>
+                          
                         </div>
 
                         {/* Cage controls */}
@@ -6601,7 +6540,7 @@ function RightPanel({
                             onClick={() => setActiveTool('SEL')}
                             className="w-full py-1.5 bg-emerald-500 text-neutral-950 hover:bg-emerald-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider text-center block mt-2"
                           >
-                            ✓ Complete
+                            Complete
                           </button>
                         </div>
                       </div>
@@ -6614,20 +6553,18 @@ function RightPanel({
                   <div className="space-y-4 bg-pink-500/5 p-4 rounded-2xl border border-pink-400/20 shadow-lg shadow-black/20 animate-fade-in">
                     <div className="flex items-center justify-between border-b border-pink-500/10 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-pink-500 animate-pulse" />
+                        <Feather className="w-4 h-4 text-pink-500" />
                         LIQUIFY WARP BRUSH
                       </span>
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing on the canvas first to use the Liquify Brush!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : !selectedObject.meshState || !selectedObject.meshState.active ? (
                       <div className="space-y-3">
-                        <p className="text-[10px] text-neutral-400 leading-normal font-bold">
-                          The Liquify Brush lets you warp, push, pinch, twist or expand areas of your shape directly. Initializes a smooth high-density geometry warp mesh first!
-                        </p>
+                        
                         <button
                           onClick={() => handleInitLiquifyMesh(selectedObject)}
                           className="w-full py-2 bg-pink-500 text-neutral-950 hover:bg-pink-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
@@ -6741,7 +6678,7 @@ function RightPanel({
                             onClick={() => setActiveTool('SEL')}
                             className="w-full py-1.5 bg-pink-500 text-neutral-950 hover:bg-pink-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider text-center block mt-2"
                           >
-                            ✓ Complete
+                            Complete
                           </button>
                         </div>
                       </div>
@@ -6754,7 +6691,7 @@ function RightPanel({
                   <div className="space-y-4 bg-amber-500/5 p-4 rounded-2xl border border-amber-400/20 shadow-lg shadow-black/20 animate-fade-in">
                     <div className="flex items-center justify-between border-b border-amber-500/10 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
+                        <Sliders className="w-4 h-4 text-amber-500" />
                         DIRECT STROKE PULL EDITOR (SPD)
                       </span>
                     </div>
@@ -6762,11 +6699,9 @@ function RightPanel({
                     {!selectedObject ? (
                       <div className="bg-amber-950/20 p-3 rounded-xl border border-amber-800/40 space-y-1.5">
                         <span className="text-xs text-amber-400 font-extrabold flex items-center gap-1">
-                          ⚠️ Selection Required
+                          Selection Required
                         </span>
-                        <p className="text-[10px] text-neutral-300 font-medium leading-relaxed">
-                          Please select a drawing on the canvas first! Stroke touch pulling strictly applies ONLY when a drawing is selected AND this tool is active.
-                        </p>
+                        
                       </div>
                     ) : (
                       <div className="space-y-4 text-xs">
@@ -6775,9 +6710,7 @@ function RightPanel({
                           <span className="text-white font-extrabold truncate max-w-[140px]">{selectedObject.name || selectedObject.id}</span>
                         </div>
 
-                        <p className="text-[10px] text-neutral-400 leading-relaxed font-semibold">
-                          Touch or click and drag anywhere on the drawing's strokes to pull, stretch, and reshape them directly by hand. Original shape is preserved with automatic smoothing.
-                        </p>
+                        
 
                         {/* Pull Radius Slider */}
                         <div className="space-y-1">
@@ -6806,9 +6739,7 @@ function RightPanel({
                             />
                             <span className="font-bold text-[11px]">Auto-Smooth & Prevent Overlap</span>
                           </label>
-                          <p className="text-[9px] text-neutral-500 font-normal pl-5">
-                            Auto-corrects stroke curvature to keep geometry smooth and clean without overlapping.
-                          </p>
+                          
                         </div>
 
                         {/* Finish Button */}
@@ -6817,7 +6748,7 @@ function RightPanel({
                             onClick={() => setActiveTool('SEL')}
                             className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider text-center block"
                           >
-                            ✓ Finish Editing
+                            Finish Editing
                           </button>
                         </div>
                       </div>
@@ -6838,11 +6769,9 @@ function RightPanel({
                     {!selectedObject ? (
                       <div className="bg-blue-950/20 p-3 rounded-xl border border-blue-800/40 space-y-1.5">
                         <span className="text-xs text-blue-400 font-extrabold flex items-center gap-1">
-                          ⚠️ Selection Required
+                          Selection Required
                         </span>
-                        <p className="text-[10px] text-neutral-300 font-medium leading-relaxed">
-                          Please select a drawing on the canvas first! Direct stroke position moving strictly applies ONLY when a drawing is selected AND this tool is active.
-                        </p>
+                        
                       </div>
                     ) : (
                       <div className="space-y-4 text-xs">
@@ -6851,9 +6780,7 @@ function RightPanel({
                           <span className="text-white font-extrabold truncate max-w-[140px]">{selectedObject.name || selectedObject.id}</span>
                         </div>
 
-                        <p className="text-[10px] text-neutral-400 leading-relaxed font-semibold">
-                          Touch or click directly anywhere on a stroke (top, middle, bottom) and drag to shift strictly its position. Moves stroke points cleanly without bending, warping or changing shape!
-                        </p>
+                        
 
                         {/* Move Scope Mode */}
                         <div className="space-y-1.5">
@@ -6904,7 +6831,7 @@ function RightPanel({
                             onClick={() => setActiveTool('SEL')}
                             className="w-full py-2 bg-blue-500 hover:bg-blue-400 text-neutral-950 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider text-center block"
                           >
-                            ✓ Finish Editing
+                            Finish Editing
                           </button>
                         </div>
                       </div>
@@ -6923,9 +6850,9 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a 2D stroke or drawing on the canvas to project it into a 3D volumetric model, rotate in 360°, bevel, extrude, or generate character limbs!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : (
                       <div className="space-y-4 text-xs">
                         {/* STRICT RULE-BASED 2D-TO-3D STROKE MEMORY ENGINE */}
@@ -6961,7 +6888,7 @@ function RightPanel({
                             className="w-full py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black text-[10px] uppercase tracking-wider rounded-xl shadow transition-all flex items-center justify-center gap-1.5"
                           >
                             <Box className="w-3.5 h-3.5" />
-                            {selectedObject.type === '3d' ? 'Revert to 2D Vector Stroke' : '✨ Convert 2D Stroke to 3D Model'}
+                            {selectedObject.type === '3d' ? 'Revert to 2D Vector Stroke' : ' Convert 2D Stroke to 3D Model'}
                           </button>
                         </div>
 
@@ -7116,12 +7043,10 @@ function RightPanel({
                         {/* 3D Character Limb Generator */}
                         <div className="space-y-2 border-t border-neutral-800/60 pt-3">
                           <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 flex items-center gap-1">
-                            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                            <Box className="w-3.5 h-3.5 text-purple-400" />
                             3D Character Anatomy & Limb Generator
                           </span>
-                          <p className="text-[9.5px] text-neutral-400 leading-tight">
-                            Generate matching 3D limbs (legs, hands, arms, or branches) directly from this single stroke:
-                          </p>
+                          
 
                           <div className="grid grid-cols-1 gap-1.5 pt-1">
                             <button
@@ -7136,7 +7061,7 @@ function RightPanel({
                               }}
                               className="w-full py-1.5 bg-neutral-900/90 hover:bg-neutral-800 border border-purple-500/30 text-purple-300 text-[10px] font-black rounded-xl transition-all flex items-center justify-center gap-1.5"
                             >
-                              🦴 Generate 3D Symmetrical Legs
+                              Generate 3D Symmetrical Legs
                             </button>
 
                             <button
@@ -7151,7 +7076,7 @@ function RightPanel({
                               }}
                               className="w-full py-1.5 bg-neutral-900/90 hover:bg-neutral-800 border border-purple-500/30 text-purple-300 text-[10px] font-black rounded-xl transition-all flex items-center justify-center gap-1.5"
                             >
-                              🖐️ Generate 3D Arms & Hands
+                              Generate 3D Arms & Hands
                             </button>
 
                             <button
@@ -7166,7 +7091,7 @@ function RightPanel({
                               }}
                               className="w-full py-1.5 bg-neutral-900/90 hover:bg-neutral-800 border border-indigo-500/30 text-indigo-300 text-[10px] font-black rounded-xl transition-all flex items-center justify-center gap-1.5"
                             >
-                              🌿 Duplicate 3D Branch / Segment
+                              Duplicate 3D Branch / Segment
                             </button>
                           </div>
                         </div>
@@ -7177,7 +7102,7 @@ function RightPanel({
                             onClick={() => setActiveTool('SEL')}
                             className="w-full py-2 bg-indigo-500 hover:bg-indigo-400 text-white font-black text-[10px] rounded-xl uppercase tracking-wider shadow transition-all"
                           >
-                            ✓ Done 3D Extruding
+                            Done 3D Extruding
                           </button>
                         </div>
                       </div>
@@ -7196,14 +7121,12 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing on the canvas first to warp it using the Curve Path Tool!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : (
                       <div className="space-y-4 text-xs">
-                        <p className="text-[10px] text-neutral-400 leading-normal font-bold">
-                          The Curve Path Tool lets you smoothly blend, stretch, bend, or rotate your drawings by dragging the cyan (horizontal) and yellow (vertical) control lines.
-                        </p>
+                        
 
                         {/* Controls for horizontal points */}
                         <div className="space-y-1">
@@ -7410,7 +7333,7 @@ function RightPanel({
                             onClick={() => setActiveTool('SEL')}
                             className="w-full py-1.5 bg-cyan-500 text-neutral-950 hover:bg-cyan-400 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider text-center block mt-2"
                           >
-                            ✓ Complete
+                            Complete
                           </button>
                         </div>
                       </div>
@@ -7429,14 +7352,12 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing on the canvas first to attach a flexible curve line to bend parts like a dog's tail, limb, or arm!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : (
                       <div className="space-y-4 text-xs">
-                        <p className="text-[10px] text-neutral-300 leading-normal font-medium">
-                          Overlay a flexible curve line on any drawing region. Position it over a tail or limb, click <strong className="text-emerald-400">Done</strong> to link it, then bend the line handles to flex that part flawlessly without stretching!
-                        </p>
+                        
 
                         {/* Attach / Detach Action Button */}
                         <div className="pt-1">
@@ -7463,7 +7384,7 @@ function RightPanel({
                               }}
                               className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 cursor-pointer flex items-center justify-center gap-2"
                             >
-                              <Sparkles className="w-4 h-4" />
+                              <Link className="w-4 h-4" />
                               Done / Attach Curve to Drawing
                             </button>
                           ) : (
@@ -7490,7 +7411,7 @@ function RightPanel({
                                   }}
                                   className="py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold rounded-xl text-[10px] uppercase tracking-wider transition-all cursor-pointer"
                                 >
-                                  🔓 Detach Line
+                                  Detach Line
                                 </button>
 
                                 <button
@@ -7514,7 +7435,7 @@ function RightPanel({
                                   }}
                                   className="py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold rounded-xl text-[10px] uppercase tracking-wider transition-all cursor-pointer border border-amber-500/30"
                                 >
-                                  🔄 Reset Bend
+                                  Reset Bend
                                 </button>
                               </div>
                             </div>
@@ -7548,16 +7469,14 @@ function RightPanel({
                             }}
                             className="w-full accent-emerald-500 bg-neutral-900 rounded-lg appearance-none h-1.5 cursor-pointer"
                           />
-                          <p className="text-[8.5px] text-neutral-500 italic">
-                            Controls how far around the curve line drawing vertices bend (smaller for tail/fingers, larger for entire limb/body).
-                          </p>
+                          
                         </div>
 
                         <button
                           onClick={() => setActiveTool('SEL')}
                           className="w-full py-2 bg-emerald-500 text-neutral-950 hover:bg-emerald-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider text-center block mt-3"
                         >
-                          ✓ Complete & Return to Select
+                          Complete & Return to Select
                         </button>
                       </div>
                     )}
@@ -7575,14 +7494,12 @@ function RightPanel({
                     </div>
 
                     {!selectedObject ? (
-                      <p className="text-[10px] text-neutral-400 font-bold leading-normal">
-                        Select a drawing on canvas to place custom points!
-                      </p>
+                      <div className="p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 text-center">
+                        <span className="text-xs text-neutral-500 font-bold">No Drawing Selected</span>
+                      </div>
                     ) : (
                       <div className="space-y-3 text-xs">
-                        <p className="text-[10px] text-neutral-300 leading-normal font-medium">
-                          Click anywhere on drawing to place <b>Blue Points</b>. When 2 or more points are placed, drag points to move drawing sections strictly as-is without stroke distortion or overlap.
-                        </p>
+                        
 
                         {(() => {
                           const vdfState = selectedObject.customVectorDeformState || {
@@ -7603,21 +7520,17 @@ function RightPanel({
                               {nodeCount < 2 ? (
                                 <div className="bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-xl text-[10px] text-amber-300 font-bold text-center space-y-1">
                                   <span className="text-amber-400 font-black block uppercase tracking-wider flex items-center justify-center gap-1">
-                                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                                    <MapPin className="w-3.5 h-3.5 text-amber-400" />
                                     Add 2 or More Points to Rigid Deform
                                   </span>
-                                  <p className="text-[9px] text-neutral-300 font-medium leading-normal">
-                                    Click on drawing (e.g. shoulder start point &amp; hand end point). Minimum 2 points are strictly required!
-                                  </p>
+                                  
                                 </div>
                               ) : (
                                 <div className="bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-xl text-[10px] text-emerald-300 font-bold text-center space-y-1">
                                   <span className="text-emerald-400 font-black block uppercase tracking-wider flex items-center justify-center gap-1">
-                                    ✅ {nodeCount} Joint Points Active
+                                    {nodeCount} Joint Points Active
                                   </span>
-                                  <p className="text-[9px] text-neutral-300 font-medium leading-normal">
-                                    Drag points to move drawing as-is. Stroke shapes, widths &amp; details are strictly preserved without overlap or distortion!
-                                  </p>
+                                  
                                 </div>
                               )}
 
@@ -7625,7 +7538,7 @@ function RightPanel({
                               <div className="space-y-1.5 bg-neutral-900/80 p-2.5 rounded-xl border border-neutral-800">
                                 <div className="flex justify-between items-center text-[10px]">
                                   <span className="text-neutral-300 font-bold uppercase tracking-wider flex items-center gap-1">
-                                    🎯 Point Area Capture Radius
+                                    Point Area Capture Radius
                                   </span>
                                   <span className="font-mono text-yellow-400 font-black">
                                     {vdfState.captureRadius || vdfState.stiffness || 50}px
@@ -7656,11 +7569,9 @@ function RightPanel({
                               <div className="flex items-center justify-between bg-neutral-900/80 p-2.5 rounded-xl border border-neutral-800">
                                 <div className="flex flex-col pr-2">
                                   <span className="text-[10px] text-yellow-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                                    🌱 Extrude Point Mode
+                                    Extrude Point Mode
                                   </span>
-                                  <span className="text-[8.5px] text-neutral-400">
-                                    Click/drag from point to spawn connected joint points (vector chain)
-                                  </span>
+                                  
                                 </div>
                                 <button
                                   type="button"
@@ -7687,7 +7598,7 @@ function RightPanel({
                                 <div className="space-y-1.5 bg-neutral-900/90 p-2.5 rounded-xl border border-blue-500/30 shadow-inner">
                                   <div className="flex justify-between items-center text-[10px]">
                                     <span className="text-yellow-400 font-black uppercase tracking-wider flex items-center gap-1">
-                                      ⭐ Active Point: #{ (vdfState.selectedNodeIndex ?? 0) + 1 } (Yellow)
+                                      Active Point: #{ (vdfState.selectedNodeIndex ?? 0) + 1 } (Yellow)
                                     </span>
                                     <span className="text-blue-400 font-mono text-[9px] font-bold">
                                       {nodeCount} Blue Points
@@ -7715,7 +7626,7 @@ function RightPanel({
                                               : "bg-blue-600/30 border border-blue-400/40 text-blue-300 hover:bg-blue-600 hover:text-white"
                                           }`}
                                         >
-                                          {isSelected ? `⭐ Pt #${idx + 1}` : `Pt #${idx + 1}`}
+                                          {isSelected ? `Pt #${idx + 1}` : `Pt #${idx + 1}`}
                                         </button>
                                       );
                                     })}
@@ -7723,7 +7634,7 @@ function RightPanel({
                                 </div>
                               )}
 
-                              {/* 🎯 DONE / AUTO-WEIGHTING BUTTON (STRICT VPR LOCK REQUIREMENT) */}
+                              {/* DONE / AUTO-WEIGHTING BUTTON (STRICT VPR LOCK REQUIREMENT) */}
                               {nodeCount > 0 && (
                                 <div className="space-y-2 pt-1">
                                   <button
@@ -7742,7 +7653,7 @@ function RightPanel({
                                     }`}
                                   >
                                     <CheckCircle className="w-4 h-4" />
-                                    {vdfState.isBound ? "✓ Done: Points Weighted & Locked" : "✓ Click Done to Weight & Lock to Area"}
+                                    {vdfState.isBound ? "Done: Points Weighted & Locked" : "Click Done to Weight & Lock to Area"}
                                   </button>
 
                                   {vdfState.isBound && (
@@ -7751,9 +7662,7 @@ function RightPanel({
                                         <CheckSquare className="w-3.5 h-3.5" />
                                         Stroke Area Weighted &amp; Active
                                       </div>
-                                      <p className="text-[8.5px] text-neutral-300 font-normal leading-normal">
-                                        Points are permanently bound to the stroke and mesh. Dragging points deforms the drawing solidly without empty movement. Outside regions stay 100% frozen with 0.000001px stability.
-                                      </p>
+                                      
                                     </div>
                                   )}
                                 </div>
@@ -7799,7 +7708,7 @@ function RightPanel({
                                   }}
                                   className="w-full py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold rounded-xl text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
                                 >
-                                  <Sparkles className="w-3.5 h-3.5" />
+                                  <GitCommit className="w-3.5 h-3.5" />
                                   Auto-Detect Joint Skeleton
                                 </button>
 
@@ -7862,15 +7771,13 @@ function RightPanel({
                   <div className="space-y-4 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-400/20 shadow-lg shadow-black/20 animate-fade-in">
                     <div className="flex items-center justify-between border-b border-emerald-500/10 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
+                        <Feather className="w-4 h-4 text-emerald-400" />
                         SCULPT & CORRECT BRUSH (SCB)
                       </span>
                     </div>
 
                     <div className="space-y-4 text-xs">
-                      <p className="text-[10px] text-neutral-300 leading-relaxed font-medium">
-                        Drag the brush freely over <strong>ANY drawing</strong> or contour on the canvas to inflate, pinch, smooth out high-frequency kinks, or smudge strokes naturally!
-                      </p>
+                      
 
                       {/* Sculpt Brush Modes */}
                       <div className="space-y-2">
@@ -7879,10 +7786,10 @@ function RightPanel({
                         </label>
                         <div className="grid grid-cols-2 gap-1.5">
                           {[
-                            { id: 'expand', label: '🟢 Expand / Inflate', desc: 'Add volume / thicken shape outwards' },
-                            { id: 'collapse', label: '🟠 Collapse / Pinch', desc: 'Pull contours inward to thin shape' },
-                            { id: 'smooth', label: '🔵 Smooth / Relax', desc: 'Laplacian smoothing for clean curves' },
-                            { id: 'push', label: '🟣 Push / Smudge', desc: 'Move vertices along brush stroke path' }
+                            { id: 'expand', label: 'Expand / Inflate', desc: 'Add volume / thicken shape outwards' },
+                            { id: 'collapse', label: 'Collapse / Pinch', desc: 'Pull contours inward to thin shape' },
+                            { id: 'smooth', label: 'Smooth / Relax', desc: 'Laplacian smoothing for clean curves' },
+                            { id: 'push', label: 'Push / Smudge', desc: 'Move vertices along brush stroke path' }
                           ].map((mode) => (
                             <button
                               key={mode.id}
@@ -7953,9 +7860,7 @@ function RightPanel({
                           />
                           <span className="font-bold text-[10.5px]">Auto-Correct High-Frequency Kinks</span>
                         </label>
-                        <p className="text-[9px] text-neutral-400 pl-5 leading-tight">
-                          Automatically smooths and cleans up contour jitter while deforming to keep lines organic and sharp.
-                        </p>
+                        
                       </div>
 
                       {/* Target Scope */}
@@ -7969,9 +7874,7 @@ function RightPanel({
                           />
                           <span className="font-bold text-[10.5px]">Affect All Touched Drawings</span>
                         </label>
-                        <p className="text-[9px] text-neutral-400 pl-5 leading-tight">
-                          When checked, the brush deforms any drawing touched underneath the cursor without needing prior selection.
-                        </p>
+                        
                       </div>
 
                       {/* Finish / Complete Button */}
@@ -7981,7 +7884,7 @@ function RightPanel({
                           onClick={() => setActiveTool('SEL')}
                           className="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider text-center block cursor-pointer shadow-lg shadow-emerald-500/20"
                         >
-                          ✓ Complete & Return to Select
+                          Complete & Return to Select
                         </button>
                       </div>
                     </div>
@@ -7990,7 +7893,7 @@ function RightPanel({
 
                 <div className="space-y-4 bg-neutral-950/40 p-4 rounded-2xl border border-neutral-800/50">
                   <div className="text-[10px] text-amber-400 font-black uppercase tracking-wider block border-b border-neutral-800/40 pb-2 flex items-center gap-1.5 font-bold">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <Sliders className="w-3.5 h-3.5 text-amber-500" />
                     ADVANCED EFFECTS PIPELINE
                   </div>
 
@@ -8344,9 +8247,7 @@ function RightPanel({
                         </span>
                       </div>
 
-                      <p className="text-[10px] text-neutral-400 leading-normal font-medium">
-                        Drag the master slider to smoothly rotate the pseudo-3D object in 360 degrees. The engine instantly resolves to the closest camera angle.
-                      </p>
+                      
 
                       {/* Rotation Slider */}
                       <div className="space-y-1">
@@ -8492,7 +8393,7 @@ function RightPanel({
                         <div className="bg-neutral-900/90 p-2.5 rounded-xl border border-amber-500/30 space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-black uppercase text-amber-400 flex items-center gap-1">
-                              <Wand2 className="w-3.5 h-3.5" />
+                              <Sliders className="w-3.5 h-3.5" />
                               Active View Tools
                             </span>
                             <span className="text-[9px] text-amber-200/80 font-mono">
@@ -8574,7 +8475,7 @@ function RightPanel({
                               }`}
                               title="Apply Liquify Brush to active view"
                             >
-                              <Zap className="w-3 h-3 text-amber-400" />
+                              <Feather className="w-3 h-3 text-amber-400" />
                               Liquify
                             </button>
                             <button
@@ -8664,30 +8565,28 @@ function RightPanel({
                       <div className="flex items-center gap-2">
                         <Box className="w-5 h-5 text-amber-400" />
                         <span className="text-xs font-black uppercase tracking-wider text-amber-300">
-                          ✨ 2D to 3D Extrusion Engine
+                           2D to 3D Extrusion Engine
                         </span>
                       </div>
-                      <p className="text-[10px] text-neutral-300 leading-relaxed font-medium">
-                        Instantly convert this 2D drawing or PNG image into a fully-functional <b>3D object mesh</b> based on its coordinates!
-                      </p>
+                      
                       <button
                         type="button"
                         onClick={() => convertTo3D && convertTo3D(selectedObject.id)}
                         className="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black text-xs font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer uppercase tracking-wider font-sans"
                       >
-                        💫 Convert to 3D Object
+                         Convert to 3D Object
                       </button>
                     </div>
                   )}
 
-                  {/* ✨ 2D TO 3D DRAWING EXTRUSION STUDIO */}
+                  {/*  2D TO 3D DRAWING EXTRUSION STUDIO */}
                   {(selectedObject.type === 'stroke' || selectedObject.type === 'shape' || selectedObject.type === 'image') && (
                     <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-4 rounded-2xl border border-indigo-500/30 shadow-lg mt-3 space-y-3 animate-fade-in">
                       <div className="flex items-center justify-between border-b border-indigo-500/20 pb-2">
                         <div className="flex items-center gap-2">
                           <Box className="w-5 h-5 text-indigo-400 animate-spin-slow" />
                           <span className="text-xs font-black uppercase tracking-wider text-indigo-300">
-                            📐 2D to 3D Extrusion Studio
+                            2D to 3D Extrusion Studio
                           </span>
                         </div>
                         
@@ -8735,16 +8634,14 @@ function RightPanel({
                         </button>
                       </div>
 
-                      <p className="text-[10px] text-neutral-300 leading-relaxed font-medium">
-                        Extrude this 2D drawing along the Z-axis to transform it into a 3D mesh with real perspective projection, independent face styling, and lighting depth!
-                      </p>
+                      
 
                       {selectedObject.transform3D?.enabled && (
                         <div className="space-y-3.5 pt-2 animate-fade-in">
                           {/* QUICK 3D STYLE PRESETS */}
                           <div className="bg-neutral-900/80 p-2.5 rounded-xl border border-indigo-500/30 space-y-2">
                             <span className="text-[9.5px] text-amber-400 font-extrabold uppercase tracking-wider block">
-                              ⚡ Instant 3D Presets
+                               Instant 3D Presets
                             </span>
                             <div className="grid grid-cols-3 gap-1.5">
                               <button
@@ -8764,7 +8661,7 @@ function RightPanel({
                                 }}
                                 className="px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-bold text-neutral-200 rounded-lg border border-neutral-700/60 transition text-center"
                               >
-                                📦 Solid Block
+                                Solid Block
                               </button>
                               <button
                                 type="button"
@@ -8783,7 +8680,7 @@ function RightPanel({
                                 }}
                                 className="px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-bold text-neutral-200 rounded-lg border border-neutral-700/60 transition text-center"
                               >
-                                🛡️ Dome Cushion
+                                Dome Cushion
                               </button>
                               <button
                                 type="button"
@@ -8802,7 +8699,7 @@ function RightPanel({
                                 }}
                                 className="px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-bold text-neutral-200 rounded-lg border border-neutral-700/60 transition text-center"
                               >
-                                📐 Cone Taper
+                                Cone Taper
                               </button>
                               <button
                                 type="button"
@@ -8821,7 +8718,7 @@ function RightPanel({
                                 }}
                                 className="px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-bold text-neutral-200 rounded-lg border border-neutral-700/60 transition text-center"
                               >
-                                🏛️ Chamfer Bevel
+                                Chamfer Bevel
                               </button>
                               <button
                                 type="button"
@@ -8841,7 +8738,7 @@ function RightPanel({
                                 }}
                                 className="px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-bold text-neutral-200 rounded-lg border border-neutral-700/60 transition text-center"
                               >
-                                🎨 Isometric
+                                 Isometric
                               </button>
                               <button
                                 type="button"
@@ -8856,16 +8753,16 @@ function RightPanel({
                                 }}
                                 className="px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-bold text-indigo-300 rounded-lg border border-indigo-500/40 transition text-center"
                               >
-                                🔄 Reset Angles
+                                Reset Angles
                               </button>
                             </div>
                           </div>
 
-                          {/* 🕸️ WIREFRAME MESH & SUB-EXTRUSION STUDIO */}
+                          {/*  WIREFRAME MESH & SUB-EXTRUSION STUDIO */}
                           <div className="bg-amber-950/30 p-3 rounded-xl border border-amber-500/40 space-y-3">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                <Box className="w-3.5 h-3.5 text-amber-400" />
                                 Wireframe Vertices & Sub-3D
                               </span>
                               <button
@@ -8883,7 +8780,7 @@ function RightPanel({
                                     : 'bg-neutral-800 text-amber-300 border-amber-500/30 hover:bg-neutral-700'
                                 }`}
                               >
-                                {selectedObject.wireframeMode ? '🟢 Wireframe ON' : '🕸️ Enable Wireframe'}
+                                {selectedObject.wireframeMode ? 'Wireframe ON' : ' Enable Wireframe'}
                               </button>
                             </div>
 
@@ -8896,9 +8793,7 @@ function RightPanel({
                                       {(selectedObject.selectedPointIndices || []).length} / {selectedObject.points.length}
                                     </span>
                                   </div>
-                                  <p className="text-[9px] text-neutral-400 leading-tight">
-                                    Click vertices or use <b>Lasso Tool</b> on canvas to select drawing region points. Selected vertices turn <b>yellow</b>!
-                                  </p>
+                                  
 
                                   {/* Selection Controls */}
                                   <div className="grid grid-cols-3 gap-1 pt-1">
@@ -8942,7 +8837,7 @@ function RightPanel({
                                   {/* 1. Wire Density / Resampling */}
                                   <div className="space-y-1.5 pt-2 border-t border-neutral-800">
                                     <div className="flex items-center justify-between text-[9.5px] text-amber-300 font-bold">
-                                      <span>🕸️ Wire Density / Spacing</span>
+                                      <span> Wire Density / Spacing</span>
                                       <span className="font-mono text-amber-400">{sculptWireSpacing}px</span>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -8973,7 +8868,7 @@ function RightPanel({
                                   {/* 2. Inner Space (Volumetric 3D Depth) */}
                                   <div className="space-y-1 pt-2 border-t border-neutral-800">
                                     <div className="flex items-center justify-between text-[9.5px] text-amber-300 font-bold">
-                                      <span>📦 Inner Space (3D Volume Depth)</span>
+                                      <span>Inner Space (3D Volume Depth)</span>
                                       <span className="font-mono text-amber-400">{selectedObject.innerSpace3D || 0}px</span>
                                     </div>
                                     <input
@@ -8994,7 +8889,7 @@ function RightPanel({
                                   {/* 3. Sculpting Actions (Extrude, Smooth, Flatten, Mirror, Delete) */}
                                   <div className="space-y-2 pt-2 border-t border-neutral-800">
                                     <span className="text-[9.5px] text-amber-300 font-black uppercase tracking-wider block">
-                                      🛠️ Sculpting Tools & Modifiers
+                                       Sculpting Tools & Modifiers
                                     </span>
 
                                     {/* Extrude Vertices */}
@@ -9062,7 +8957,7 @@ function RightPanel({
                                         }}
                                         className="py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-[9px] rounded border border-neutral-700 text-center"
                                       >
-                                        ✨ Smooth Vertices
+                                         Smooth Vertices
                                       </button>
                                       <button
                                         type="button"
@@ -9077,7 +8972,7 @@ function RightPanel({
                                         }}
                                         className="py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-[9px] rounded border border-neutral-700 text-center"
                                       >
-                                        📐 Flatten ({sculptFlattenAxis.toUpperCase()})
+                                        Flatten ({sculptFlattenAxis.toUpperCase()})
                                       </button>
                                     </div>
 
@@ -9096,7 +8991,7 @@ function RightPanel({
                                         }}
                                         className="py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-[9px] rounded border border-neutral-700 text-center"
                                       >
-                                        🪞 Mirror ({sculptMirrorAxis.toUpperCase()})
+                                        Mirror ({sculptMirrorAxis.toUpperCase()})
                                       </button>
                                       <button
                                         type="button"
@@ -9112,7 +9007,7 @@ function RightPanel({
                                         }}
                                         className="py-1.5 bg-rose-950/80 hover:bg-rose-900 text-rose-300 font-bold text-[9px] rounded border border-rose-800/80 text-center"
                                       >
-                                        🗑️ Delete Vertices
+                                        Delete Vertices
                                       </button>
                                     </div>
                                   </div>
@@ -9120,7 +9015,7 @@ function RightPanel({
                                   {/* 4. Prebuilt Actions / Saved Selections ("Make Action") */}
                                   <div className="space-y-2 pt-2 border-t border-neutral-800">
                                     <span className="text-[9.5px] text-amber-300 font-black uppercase tracking-wider block">
-                                      🏷️ Saved Selections (Macro Actions)
+                                      Saved Selections (Macro Actions)
                                     </span>
                                     <div className="flex gap-1.5">
                                       <input
@@ -9174,7 +9069,7 @@ function RightPanel({
                                               }}
                                               className="font-bold text-amber-300 hover:underline text-left truncate flex-1"
                                             >
-                                              🎯 {macro.name} ({macro.vertexIndices?.length || 0} pts)
+                                              {macro.name} ({macro.vertexIndices?.length || 0} pts)
                                             </button>
                                             <button
                                               type="button"
@@ -9224,7 +9119,7 @@ function RightPanel({
                                     }}
                                     className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black uppercase text-xs rounded-lg shadow-md transition-all text-center tracking-wider cursor-pointer"
                                   >
-                                    ✅ Done Selection (Apply 3D Extrusion)
+                                    Done Selection (Apply 3D Extrusion)
                                   </button>
                                 </div>
 
@@ -9249,7 +9144,7 @@ function RightPanel({
                                       return (
                                         <div className="space-y-2.5">
                                           <div className="flex items-center justify-between text-[10px] font-bold text-amber-300 border-b border-amber-500/20 pb-1.5">
-                                            <span>✨ Active 3D Part ({activeSub.pointIndices.length} Vertices)</span>
+                                            <span> Active 3D Part ({activeSub.pointIndices.length} Vertices)</span>
                                             <span className="font-mono text-neutral-400">{activeSub.name}</span>
                                           </div>
 
@@ -9429,7 +9324,7 @@ function RightPanel({
                                               }}
                                               className="py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[9.5px] rounded-lg border border-indigo-400/50 text-center transition cursor-pointer"
                                             >
-                                              ➕ Chain Next Part
+                                              Chain Next Part
                                             </button>
 
                                             <button
@@ -9442,7 +9337,7 @@ function RightPanel({
                                               }}
                                               className="py-1.5 bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold text-[9.5px] rounded-lg border border-amber-500/30 text-center transition cursor-pointer"
                                             >
-                                              🔄 New Vertices
+                                              New Vertices
                                             </button>
                                           </div>
                                         </div>
@@ -9457,7 +9352,7 @@ function RightPanel({
                           {/* 1. GEOMETRY EXTRUSION & FOV */}
                           <div className="bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/80 space-y-3">
                             <span className="text-[9.5px] text-indigo-400 font-extrabold uppercase tracking-wider block">
-                              📦 Mesh Geometry & Bevel Curves
+                              Mesh Geometry & Bevel Curves
                             </span>
 
                             {/* Extrusion Depth */}
@@ -9560,7 +9455,7 @@ function RightPanel({
                             {/* Auto-Fill Inner Enclosed Region Toggle */}
                             <div className="flex items-center justify-between pt-1.5 border-t border-neutral-800/40">
                               <span className="text-[10px] text-amber-300 font-bold uppercase flex flex-col">
-                                <span>✨ Auto-Fill Inner Region</span>
+                                <span> Auto-Fill Inner Region</span>
                                 <span className="text-[8px] text-neutral-400 font-normal normal-case leading-tight">Automatically fills enclosed path interior</span>
                               </span>
                               <button
@@ -9592,7 +9487,7 @@ function RightPanel({
                           {/* 2. 3D EULER ROTATION */}
                           <div className="bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/80 space-y-3">
                             <span className="text-[9.5px] text-indigo-400 font-extrabold uppercase tracking-wider block">
-                              🔄 3D Space Rotation
+                              3D Space Rotation
                             </span>
 
                             {/* Rotate X */}
@@ -9668,7 +9563,7 @@ function RightPanel({
                           {/* 3. 3D AXIS SCALE & TRANS */}
                           <div className="bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/80 space-y-3">
                             <span className="text-[9.5px] text-indigo-400 font-extrabold uppercase tracking-wider block">
-                              📐 3D Axis Transformations
+                              3D Axis Transformations
                             </span>
 
                             {/* Scale X */}
@@ -9767,11 +9662,11 @@ function RightPanel({
                             </div>
                           </div>
 
-                          {/* 4. 🌊 5 EXTRA 3D TRANSFORM DEPTH SLIDERS */}
+                          {/* 4. 5 EXTRA 3D TRANSFORM DEPTH SLIDERS */}
                           <div className="bg-gradient-to-r from-amber-950/40 to-indigo-950/40 p-3 rounded-xl border border-amber-500/40 space-y-3 shadow-md">
                             <div className="flex items-center justify-between">
                               <span className="text-[9.5px] text-amber-300 font-extrabold uppercase tracking-wider block">
-                                ✨ Advanced 3D Depth & Deformation Controls (5 Controls)
+                                 Advanced 3D Depth & Deformation Controls (5 Controls)
                               </span>
                               <button
                                 type="button"
@@ -9797,7 +9692,7 @@ function RightPanel({
                             <div className="space-y-1">
                               <div className="flex items-center justify-between text-[10px] text-neutral-300">
                                 <span className="flex items-center gap-1 font-semibold">
-                                  <span>📐 Depth Taper (Conical Width)</span>
+                                  <span>Depth Taper (Conical Width)</span>
                                 </span>
                                 <span className="text-amber-400 font-bold font-mono">
                                   {selectedObject.transform3D.depthTaper ?? 0}%
@@ -9823,7 +9718,7 @@ function RightPanel({
                             <div className="space-y-1">
                               <div className="flex items-center justify-between text-[10px] text-neutral-300">
                                 <span className="flex items-center gap-1 font-semibold">
-                                  <span>🌊 Depth Curvature (3D Z-Arc Bend)</span>
+                                  <span>Depth Curvature (3D Z-Arc Bend)</span>
                                 </span>
                                 <span className="text-amber-400 font-bold font-mono">
                                   {selectedObject.transform3D.depthCurvature ?? 0}°
@@ -9849,7 +9744,7 @@ function RightPanel({
                             <div className="space-y-1">
                               <div className="flex items-center justify-between text-[10px] text-neutral-300">
                                 <span className="flex items-center gap-1 font-semibold">
-                                  <span>🌀 3D Twist Z (Helical Ribbon)</span>
+                                  <span>3D Twist Z (Helical Ribbon)</span>
                                 </span>
                                 <span className="text-amber-400 font-bold font-mono">
                                   {selectedObject.transform3D.twistZ ?? 0}°
@@ -9875,7 +9770,7 @@ function RightPanel({
                             <div className="space-y-1">
                               <div className="flex items-center justify-between text-[10px] text-neutral-300">
                                 <span className="flex items-center gap-1 font-semibold">
-                                  <span>↗️ Depth Shear Z (Diagonal Skew)</span>
+                                  <span>Depth Shear Z (Diagonal Skew)</span>
                                 </span>
                                 <span className="text-amber-400 font-bold font-mono">
                                   {selectedObject.transform3D.shearZ ?? 0}px
@@ -9901,7 +9796,7 @@ function RightPanel({
                             <div className="space-y-1">
                               <div className="flex items-center justify-between text-[10px] text-neutral-300">
                                 <span className="flex items-center gap-1 font-semibold">
-                                  <span>🎈 Inflate Bulge (Puff 3D Volume)</span>
+                                  <span>Inflate Bulge (Puff 3D Volume)</span>
                                 </span>
                                 <span className="text-amber-400 font-bold font-mono">
                                   {selectedObject.transform3D.inflateDepth ?? 0}px
@@ -9929,7 +9824,7 @@ function RightPanel({
                             <div className="flex items-center justify-between">
                               <span className="text-[9.5px] text-indigo-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
                                 <Palette className="w-3.5 h-3.5" />
-                                🎨 3D Face Paint Workbench
+                                 3D Face Paint Workbench
                               </span>
                             </div>
 
@@ -10131,9 +10026,7 @@ function RightPanel({
                         </span>
                       </div>
 
-                      <p className="text-[10px] text-neutral-400 leading-normal font-medium">
-                        Manipulate coordinates directly across both 2D and 3D viewport metrics. Changes resolve to the projection layer in real-time.
-                      </p>
+                      
 
                       {/* HIDE 3D GRID LINES TOGGLE */}
                       <div className="flex items-center justify-between bg-neutral-950/40 p-2.5 rounded-xl border border-neutral-800/50">
@@ -10159,11 +10052,11 @@ function RightPanel({
                         </button>
                       </div>
 
-                      {/* 🎲 3D ADVANCED MODELING STUDIO */}
+                      {/*  3D ADVANCED MODELING STUDIO */}
                       <div className="space-y-3 bg-neutral-900/60 p-3.5 rounded-xl border border-neutral-800/80">
                         <div className="flex items-center justify-between border-b border-neutral-800/60 pb-2">
                           <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
-                            <Sparkles className="w-3.5 h-3.5" />
+                            <Box className="w-3.5 h-3.5" />
                             3D Modeling Studio
                           </span>
                           <span className="text-[8px] bg-amber-500/10 text-amber-400 font-bold px-1.5 py-0.5 rounded uppercase">
@@ -10767,11 +10660,11 @@ function RightPanel({
                         </div>
                       </div>
 
-                      {/* 🌊 5 EXTRA 3D TRANSFORM DEPTH SLIDERS FOR 3D MESH */}
+                      {/* 5 EXTRA 3D TRANSFORM DEPTH SLIDERS FOR 3D MESH */}
                       <div className="bg-gradient-to-r from-amber-950/40 to-indigo-950/40 p-3 rounded-xl border border-amber-500/40 space-y-3 shadow-md">
                         <div className="flex items-center justify-between">
                           <span className="text-[9.5px] text-amber-300 font-extrabold uppercase tracking-wider block">
-                            ✨ 3D Depth & Organic Deformation (5 Sliders)
+                             3D Depth & Organic Deformation (5 Sliders)
                           </span>
                           <button
                             type="button"
@@ -10797,7 +10690,7 @@ function RightPanel({
                         <div className="space-y-1">
                           <div className="flex items-center justify-between text-[10px] text-neutral-300">
                             <span className="flex items-center gap-1 font-semibold">
-                              <span>📐 Depth Taper (Conical Width)</span>
+                              <span>Depth Taper (Conical Width)</span>
                             </span>
                             <span className="text-amber-400 font-bold font-mono">
                               {selectedObject.transform3D.depthTaper ?? 0}%
@@ -10823,7 +10716,7 @@ function RightPanel({
                         <div className="space-y-1">
                           <div className="flex items-center justify-between text-[10px] text-neutral-300">
                             <span className="flex items-center gap-1 font-semibold">
-                              <span>🌊 Depth Curvature (3D Z-Arc Bend)</span>
+                              <span>Depth Curvature (3D Z-Arc Bend)</span>
                             </span>
                             <span className="text-amber-400 font-bold font-mono">
                               {selectedObject.transform3D.depthCurvature ?? 0}°
@@ -10849,7 +10742,7 @@ function RightPanel({
                         <div className="space-y-1">
                           <div className="flex items-center justify-between text-[10px] text-neutral-300">
                             <span className="flex items-center gap-1 font-semibold">
-                              <span>🌀 3D Twist Z (Helical Ribbon)</span>
+                              <span>3D Twist Z (Helical Ribbon)</span>
                             </span>
                             <span className="text-amber-400 font-bold font-mono">
                               {selectedObject.transform3D.twistZ ?? 0}°
@@ -10875,7 +10768,7 @@ function RightPanel({
                         <div className="space-y-1">
                           <div className="flex items-center justify-between text-[10px] text-neutral-300">
                             <span className="flex items-center gap-1 font-semibold">
-                              <span>↗️ Depth Shear Z (Diagonal Skew)</span>
+                              <span>Depth Shear Z (Diagonal Skew)</span>
                             </span>
                             <span className="text-amber-400 font-bold font-mono">
                               {selectedObject.transform3D.shearZ ?? 0}px
@@ -10901,7 +10794,7 @@ function RightPanel({
                         <div className="space-y-1">
                           <div className="flex items-center justify-between text-[10px] text-neutral-300">
                             <span className="flex items-center gap-1 font-semibold">
-                              <span>🎈 Inflate Bulge (Puff 3D Volume)</span>
+                              <span>Inflate Bulge (Puff 3D Volume)</span>
                             </span>
                             <span className="text-amber-400 font-bold font-mono">
                               {selectedObject.transform3D.inflateDepth ?? 0}px
@@ -10936,9 +10829,7 @@ function RightPanel({
                           </span>
                         </div>
 
-                        <p className="text-[10px] text-neutral-400 leading-normal font-medium">
-                          Rig your custom single 3D mesh by adding skeletal bones between vertices. Vertices will deform organically around joints based on bones' angles!
-                        </p>
+                        
 
                         {/* List Active Bones */}
                         <div className="space-y-3">
@@ -10953,7 +10844,7 @@ function RightPanel({
                               <div key={bone.id || bIdx} className="bg-neutral-950/80 p-3 rounded-xl border border-neutral-850 space-y-2.5">
                                 <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
                                   <span className="text-[10px] font-black text-amber-300 uppercase truncate">
-                                    🦴 {bone.name || `Bone_${bIdx + 1}`}
+                                    {bone.name || `Bone_${bIdx + 1}`}
                                   </span>
                                   <span className="text-[8.5px] font-mono text-neutral-500">
                                     Verts: {bone.startVertexIdx} ➔ {bone.endVertexIdx}
@@ -11116,7 +11007,7 @@ function RightPanel({
                     </div>
                   )}
 
-                  {/* 🎯 2D-TO-3D RULE-BASED TRANSFORM ENGINE (STROKE MEMORY + VIRTUAL SOUL) */}
+                  {/* 2D-TO-3D RULE-BASED TRANSFORM ENGINE (STROKE MEMORY + VIRTUAL SOUL) */}
                   {(selectedObject.type === 'stroke' || selectedObject.type === 'shape' || selectedObject.type === 'image') && (
                     <div className="mt-3">
                       <RuleTransform3DStudio
@@ -11429,7 +11320,7 @@ function RightPanel({
                     <div className="flex items-center justify-between py-1.5 bg-neutral-950/30 px-2 rounded-lg border border-neutral-800/40">
                       <div className="flex flex-col">
                         <span className="text-[10px] text-neutral-300 font-bold uppercase">Apply Fill Color</span>
-                        <span className="text-[8px] text-neutral-500">If disabled, drawing fill is transparent</span>
+                        
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
@@ -11551,10 +11442,10 @@ function RightPanel({
                     <button
                       id="btn-execute-make-single"
                       onClick={handleMakeSingle}
-                      className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-black rounded-xl transition-all shadow-md shadow-amber-500/10 text-xs flex items-center justify-center gap-1.5 mt-2 cursor-pointer animate-fade-in"
+                      className="btn-dark-white w-full py-2 bg-neutral-100 hover:bg-neutral-200 border-2 border-neutral-300 text-neutral-900 font-black rounded-xl transition-all shadow-sm text-xs flex items-center justify-center gap-1.5 mt-2 cursor-pointer animate-fade-in"
                     >
-                      <GitMerge className="w-3.5 h-3.5" />
-                      MAKE SINGLE DRAWING
+                      <GitMerge className="w-3.5 h-3.5 text-neutral-900" />
+                      <span className="font-black text-neutral-900">MAKE SINGLE DRAWING</span>
                     </button>
                   )}
                 </div>
@@ -11871,10 +11762,10 @@ function RightPanel({
                     </div>
                   </div>
 
-                  {/* 🎥 3D VIEW & DUAL-AXIS ROTATION SECTION */}
+                  {/* 3D VIEW & DUAL-AXIS ROTATION SECTION */}
                   <div className="space-y-3 pt-2 border-t border-neutral-800/30">
                     <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-400">
-                      <span>🎥 3D View & Rotation System</span>
+                      <span>3D View & Rotation System</span>
                     </div>
 
                     {/* Camera Angle X (Up/Down View) */}
@@ -12061,9 +11952,7 @@ function RightPanel({
                         );
                       })}
                     </div>
-                    <span className="text-[10px] text-neutral-500 font-bold block pt-1 leading-normal">
-                      Note: Adjusting any transforms above applies to all checked batch drawings instantly.
-                    </span>
+                    
                   </div>
                 )}
 
@@ -12156,7 +12045,7 @@ function RightPanel({
             <div className="space-y-4 bg-neutral-950/40 p-4 rounded-2xl border border-neutral-800/50 mt-4 animate-fade-in">
               <div className="flex items-center justify-between text-[10px] text-amber-400 font-black uppercase tracking-wider font-black border-b border-neutral-800/40 pb-2.5">
                 <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                  <Palette className="w-3.5 h-3.5 text-amber-500" />
                   Lasso Area Color Fill
                 </span>
                 {lassoPoints.length > 0 && (
@@ -12167,9 +12056,7 @@ function RightPanel({
               </div>
 
               <div className="space-y-3.5 text-xs">
-                <p className="text-[11px] text-neutral-400 leading-relaxed font-medium">
-                  Draw an area around your drawings with the <strong className="text-amber-400">Lasso Fill tool (Sparkles)</strong>, select a color, and tap Fill to color only that section.
-                </p>
+                
 
                 {/* Selection Mode Toggle */}
                 <div className="flex bg-neutral-900/60 p-1 rounded-xl border border-neutral-800/60 gap-1">
@@ -12185,7 +12072,7 @@ function RightPanel({
                         : 'text-neutral-400 hover:text-neutral-200'
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Spline className="w-3.5 h-3.5" />
                     Freehand Lasso
                   </button>
                   <button
@@ -12215,7 +12102,7 @@ function RightPanel({
                         : 'bg-neutral-900 text-neutral-300 hover:text-white border-neutral-800 hover:border-neutral-700'
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Spline className="w-3.5 h-3.5" />
                     Lasso Tool
                   </button>
 
@@ -12267,7 +12154,7 @@ function RightPanel({
                     onClick={handleApplyLassoFill}
                     className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/10 cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Palette className="w-3.5 h-3.5" />
                     FILL LASSO REGION
                   </button>
 
@@ -12298,9 +12185,7 @@ function RightPanel({
               </div>
 
               <div className="space-y-3 text-xs">
-                <p className="text-[11px] text-neutral-400 leading-relaxed font-medium">
-                  Deeply scans drawings to detect and seal unclosed path gaps, missing interior fills, and microscopic hairline seams. Automatically expands and updates as drawings scale, flex, or deform.
-                </p>
+                
 
                 {/* Primary Fill Gap Action Button */}
                 <button
@@ -12308,7 +12193,7 @@ function RightPanel({
                   onClick={handleDeepFillGaps}
                   className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black uppercase text-xs rounded-xl tracking-wider shadow-lg shadow-amber-500/15 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <PaintBucket className="w-4 h-4" />
                   FILL DEEP GAPS NOW
                 </button>
 
@@ -12326,7 +12211,7 @@ function RightPanel({
                     <div className="flex items-center justify-between bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800/60">
                       <div className="flex flex-col">
                         <span className="text-[10px] text-neutral-200 font-black uppercase tracking-wider">Auto-Fill Gaps on Transform</span>
-                        <span className="text-[8px] text-neutral-400">Expands fill continuously as drawing scales or deforms</span>
+                        
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
@@ -12389,9 +12274,7 @@ function RightPanel({
               </div>
 
               <div className="space-y-3 text-xs">
-                <p className="text-[11px] text-neutral-400 leading-relaxed font-medium">
-                  Connect multiple separate drawings permanently so they <strong className="text-amber-400">always move together</strong> as a rigid group while keeping individual rotation, scales, colors, and layering.
-                </p>
+                
 
                 {/* Dropdown to add drawings */}
                 <div className="space-y-2">
@@ -12522,7 +12405,7 @@ function RightPanel({
                 </div>
 
                 <div className="bg-neutral-900/45 p-2.5 rounded-xl border border-neutral-850 text-[10px] text-neutral-400 leading-relaxed italic text-center">
-                  🎨 Choose from lightweight vector brushes below and adjust stroke parameters.
+                   
                 </div>
 
                 {/* VECTOR BRUSH SELECTOR */}
@@ -12537,7 +12420,7 @@ function RightPanel({
                       { id: 'pencil', label: 'Pencil Sketch', desc: 'Textured graphite' },
                       { id: 'marker', label: 'Marker Highlighter', desc: 'Translucent marker' },
                       { id: 'airbrush', label: 'Airbrush Spray', desc: 'Soft gradient glow' },
-                      { id: 'glow', label: '✨ Glow Paint (Neon Aura)', desc: 'Neon glowing aura spray / paint' },
+                      { id: 'glow', label: ' Glow Paint (Neon Aura)', desc: 'Neon glowing aura spray / paint' },
                     ].map((b) => {
                       const isActive = (brushSettings.brushType || 'solid') === b.id;
                       return (
@@ -12555,7 +12438,7 @@ function RightPanel({
                             <div className="text-[11px] leading-tight font-bold">{b.label}</div>
                             <div className="text-[9px] opacity-70 font-normal leading-none mt-0.5">{b.desc}</div>
                           </div>
-                          {isActive && <span className="text-[10px] text-amber-400 font-black">✓ SELECTED</span>}
+                          {isActive && <span className="text-[10px] text-amber-400 font-black">SELECTED</span>}
                         </button>
                       );
                     })}
@@ -12639,7 +12522,7 @@ function RightPanel({
                 <div className="space-y-3 bg-neutral-900/55 p-3 rounded-xl border border-neutral-850">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-neutral-300 font-black uppercase tracking-wider">
-                      👥 Stroke Drop Shadow
+                      Stroke Drop Shadow
                     </span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -12722,7 +12605,7 @@ function RightPanel({
             <div id="ai-smooth-motion-panel" className="space-y-4 bg-neutral-950/40 p-4 rounded-2xl border border-neutral-800/50 mt-4 animate-fade-in">
               <div className="flex items-center justify-between text-[10px] text-amber-400 font-black uppercase tracking-wider font-black border-b border-neutral-800/40 pb-2.5">
                 <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                  <Activity className="w-3.5 h-3.5 text-amber-500" />
                   AI Smooth Motion Generator
                 </span>
                 <span className="bg-amber-500/15 text-amber-400 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase">
@@ -12731,9 +12614,7 @@ function RightPanel({
               </div>
 
               <div className="space-y-3.5 text-xs">
-                <p className="text-[11px] text-neutral-400 leading-relaxed font-medium">
-                  Convert a few reference frames into a completed high-framerate animation. Works for rigged limbs, shape morphing, colors, and opacities!
-                </p>
+                
 
                 {/* Segmented Mode Selector */}
                 <div id="gen-mode-selector" className="grid grid-cols-2 gap-1.5 bg-neutral-950 p-1 rounded-xl border border-neutral-800/60">
@@ -12829,9 +12710,7 @@ function RightPanel({
                         placeholder="Select Frame"
                         className="w-full"
                       />
-                      <p className="text-[9px] text-neutral-500 pt-0.5 leading-normal">
-                        Character glides from initial pos in Ref Start Frame to target pos in End-Position Frame while repeating the cycle.
-                      </p>
+                      
                     </div>
                   </div>
                 )}
@@ -12905,7 +12784,7 @@ function RightPanel({
                     <div className="space-y-1.5 pt-2 border-t border-neutral-800/40" id="auto-inbetween-panel">
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] text-neutral-300 font-black uppercase tracking-wider flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          <Activity className="w-3.5 h-3.5 text-amber-400" />
                           Auto In-between Animation
                         </label>
                         <button
@@ -12920,11 +12799,7 @@ function RightPanel({
                           {autoTween ? 'ENABLED' : 'DISABLED'}
                         </button>
                       </div>
-                      <p className="text-[9px] text-neutral-500 leading-normal">
-                        {autoTween 
-                          ? 'Auto in-between interpolation is active: renders smooth transitions between keyframes.'
-                          : 'Auto in-between is disabled by default. Enable to render smooth keyframe transitions.'}
-                      </p>
+                      
                     </div>
                   )}
                 </div>
@@ -12937,8 +12812,8 @@ function RightPanel({
                     onClick={animationMode === 'single' ? handleGenerateSingleStep : handleGenerateMultiStep}
                     className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black uppercase text-xs rounded-xl tracking-wider shadow-lg shadow-amber-500/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
                   >
-                    <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                    ⚡ Generate Completed Animation
+                    <Play className="w-3.5 h-3.5" />
+                     Generate Completed Animation
                   </button>
 
                   {hasBackup && (

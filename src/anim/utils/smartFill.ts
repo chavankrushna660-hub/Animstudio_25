@@ -578,7 +578,7 @@ function tryFloodFillWithGap(
     }
   });
 
-  // 🌟 ACCURATE GAP CLOSING:
+  //  ACCURATE GAP CLOSING:
   // 1) Bridge gaps between stroke endpoints near each other (near 5px - gapClosurePx)
   // 2) Bridge gaps between an endpoint and a nearby segment of another stroke (T-junctions or near-touching curves)
   if (gapClosurePx > 0) {

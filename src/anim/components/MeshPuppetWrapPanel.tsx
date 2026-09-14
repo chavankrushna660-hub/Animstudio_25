@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
   LayoutGrid, 
-  Sparkles, 
   RotateCw, 
   Scale, 
   Maximize2, 
@@ -78,7 +77,7 @@ export default function MeshPuppetWrapPanel({
               : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <Layers className="w-3.5 h-3.5" />
           <span>Extrude Mode</span>
         </button>
 
@@ -231,8 +230,8 @@ export default function MeshPuppetWrapPanel({
             </div>
 
             {state.extrudePoints.length === 0 ? (
-              <div className="p-3 bg-neutral-950/50 border border-dashed border-neutral-800 rounded-lg text-center text-xs text-neutral-500">
-                👉 Click anywhere on stroke or PNG to place a point, then drag to extrude strictly that capture area!
+              <div className="p-3 bg-neutral-950/50 border border-dashed border-neutral-800 rounded-lg text-center text-xs text-neutral-500 font-bold">
+                 No extrude points placed
               </div>
             ) : (
               <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
@@ -318,7 +317,7 @@ export default function MeshPuppetWrapPanel({
             <div className="space-y-2 pt-2 border-t border-neutral-800">
               <div>
                 <div className="flex items-center justify-between text-[11px] mb-1">
-                  <span className="font-semibold text-emerald-400">➕ Increment</span>
+                  <span className="font-semibold text-emerald-400"> Increment</span>
                   <span className="font-mono font-bold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded">
                     +{state.hudIncrementValue}
                   </span>
@@ -336,7 +335,7 @@ export default function MeshPuppetWrapPanel({
 
               <div>
                 <div className="flex items-center justify-between text-[11px] mb-1">
-                  <span className="font-semibold text-rose-400">➖ Decrement</span>
+                  <span className="font-semibold text-rose-400"> Decrement</span>
                   <span className="font-mono font-bold text-rose-300 bg-rose-950/60 px-1.5 py-0.2 rounded">
                     -{state.hudDecrementValue}
                   </span>
@@ -384,7 +383,7 @@ export default function MeshPuppetWrapPanel({
 
             {state.transformPoints.length === 0 ? (
               <div className="p-3 bg-neutral-950/50 border border-dashed border-neutral-800 rounded-lg text-center text-xs text-neutral-500">
-                👉 Click anywhere on stroke or PNG to place transform boundary points. The draggable HUD box appears on canvas automatically!
+                 Click anywhere on stroke or PNG to place transform boundary points. The draggable HUD box appears on canvas automatically!
               </div>
             ) : (
               <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
@@ -408,14 +407,6 @@ export default function MeshPuppetWrapPanel({
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Transform Boundary Guidance */}
-          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-start gap-2 text-[11px] text-emerald-200/90 leading-tight">
-            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-            <span>
-              <strong>Boundary Protection:</strong> If 4 points placed (2 above, 2 below), only the inner area inside transforms. All outside points strictly stay 100% as-is without distortion or overlap breaking!
-            </span>
           </div>
         </div>
       )}

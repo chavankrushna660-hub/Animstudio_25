@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
+  Crosshair, 
   Eye, 
   EyeOff, 
   RotateCw, 
@@ -22,7 +22,8 @@ import {
   Box,
   SlidersHorizontal,
   ChevronDown,
-  Compass
+  Compass,
+  Check
 } from 'lucide-react';
 import { VectorObject, TwitchIdentifiedShape, TwitchToolState } from '../types';
 import { scanDrawingShapes, calculateCentroid, calculateArea, getPointsBounds, applyLineToolDimensions, calculatePerimeter } from '../utils/twitchEngine';
@@ -47,13 +48,10 @@ export default function TwitchToolPanel({
   if (!selectedObject) {
     return (
       <div className="bg-neutral-950/80 border border-neutral-800/80 rounded-2xl p-4 text-center space-y-2 select-none shadow-xl">
-        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
-          <Sparkles className="w-5 h-5 animate-pulse" />
+        <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center mx-auto text-neutral-300">
+          <Crosshair className="w-5 h-5" />
         </div>
-        <h4 className="text-xs font-black uppercase tracking-wider text-neutral-200">🧵 Twitch Tool Active</h4>
-        <p className="text-[11px] text-neutral-400 leading-relaxed">
-          Select any drawing on canvas to dissect its vector topology into independent sub-shapes, closed loops, and open strokes!
-        </p>
+        <h4 className="text-xs font-black uppercase tracking-wider text-neutral-200"> Twitch Tool Active</h4>
       </div>
     );
   }
@@ -222,12 +220,12 @@ export default function TwitchToolPanel({
       {/* Header Banner */}
       <div className="flex items-center justify-between border-b border-neutral-800/80 pb-2.5">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="w-6 h-6 rounded-lg bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-300">
+            <Crosshair className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 className="text-xs font-black uppercase tracking-wider text-amber-400">
-              🧵 TWITCH TOOL
+            <h3 className="text-xs font-black uppercase tracking-wider text-neutral-200">
+               TWITCH TOOL
             </h3>
             <p className="text-[10px] text-neutral-400 font-medium truncate max-w-[170px]">
               {selectedObject.name || 'Drawing Dissector'}
@@ -270,16 +268,13 @@ export default function TwitchToolPanel({
       </div>
 
       {shapes.length === 0 ? (
-        <div className="p-4 bg-amber-500/5 border border-dashed border-amber-500/30 rounded-xl text-center space-y-2">
-          <p className="text-[11px] text-neutral-300 leading-relaxed">
-            Click <strong className="text-amber-400">"Scan Shapes"</strong> to dissect eyes, ears, nose, mouth, closed contours, and open lines into independently selectable shapes.
-          </p>
+        <div className="p-4 bg-neutral-900/50 border border-dashed border-neutral-800 rounded-xl text-center space-y-2">
           <button
             onClick={handleDeepScan}
-            className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-1.5"
+            className="w-full py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-950 text-xs font-black uppercase tracking-wider rounded-xl shadow-md border-2 border-neutral-300 transition-all flex items-center justify-center gap-1.5"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            🔍 Scan Shapes Now
+            <Crosshair className="w-3.5 h-3.5" />
+             Scan Shapes Now
           </button>
         </div>
       ) : (
@@ -318,10 +313,10 @@ export default function TwitchToolPanel({
             </div>
           </div>
 
-          {/* Identified Shapes List (🧵 Twitch Shapes) */}
+          {/* Identified Shapes List ( Twitch Shapes) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[10px] text-neutral-400">
-              <span className="font-black uppercase tracking-wider">🧵 Twitch Shapes:</span>
+              <span className="font-black uppercase tracking-wider"> Twitch Shapes:</span>
               <span className="text-neutral-500 font-mono">{shapes.length} total</span>
             </div>
             <div className="max-h-36 overflow-y-auto space-y-1 pr-0.5 scrollbar-thin">
@@ -686,9 +681,7 @@ export default function TwitchToolPanel({
               {/* CURVE DEFORM CONTROLS */}
               {twitchState.activeMode === 'curve' && (
                 <div className="space-y-2.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800 text-[10px]">
-                  <p className="text-neutral-300 leading-relaxed">
-                    Interactive curve line has been placed on <strong className="text-amber-400">{selectedShape.name}</strong>. Drag the control points on canvas to warp and bend this shape contour organically!
-                  </p>
+                  
 
                   <div className="space-y-1 pt-1">
                     <div className="flex justify-between text-neutral-400 font-bold">
@@ -752,9 +745,7 @@ export default function TwitchToolPanel({
               {/* MESH WARP CONTROLS */}
               {twitchState.activeMode === 'mesh' && (
                 <div className="space-y-2.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800 text-[10px]">
-                  <p className="text-neutral-300 leading-relaxed">
-                    3x3 Deformation lattice grid is active over <strong className="text-amber-400">{selectedShape.name}</strong>. Drag grid handles on canvas to smoothly warp local vertices!
-                  </p>
+                  
 
                   <button
                     onClick={() => {
@@ -772,9 +763,7 @@ export default function TwitchToolPanel({
               {/* EDIT MODE / DIRECT HAND GRAB */}
               {twitchState.activeMode === 'edit' && (
                 <div className="space-y-2.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800 text-[10px]">
-                  <p className="text-neutral-300 leading-relaxed">
-                    <strong className="text-blue-400">Direct Hand Grab & Anchor Point Edit</strong>: Drag points on the stroke of <strong className="text-amber-400">{selectedShape.name}</strong> to stretch and reshape organically!
-                  </p>
+                  
                   
                   <button
                     onClick={() => {
@@ -793,9 +782,7 @@ export default function TwitchToolPanel({
               {/* LINE EDIT CONTROLS */}
               {twitchState.activeMode === 'line' && (
                 <div className="space-y-3 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800 text-[10px]">
-                  <p className="text-neutral-300 leading-relaxed">
-                    Line Tool applied to <strong className="text-amber-400">{selectedShape.name}</strong>. Set the line width & height below and click <strong className="text-amber-400">OK / Apply</strong> to deform strictly within the line dimensions:
-                  </p>
+                  
 
                   {/* Target Line Width */}
                   <div className="space-y-1 bg-neutral-950/60 p-2 rounded-lg border border-neutral-800">
@@ -871,9 +858,9 @@ export default function TwitchToolPanel({
                         const updatedShapes = (twitchState.shapes || []).map(s => s.id === selectedShape.id ? deformedShape : s);
                         setTwitch({ shapes: updatedShapes });
                       }}
-                      className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black rounded-xl transition-all shadow-lg shadow-amber-500/20 uppercase tracking-wider flex items-center justify-center gap-1.5"
+                      className="w-full py-2 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-800 text-white font-black rounded-xl transition-all shadow-md uppercase tracking-wider flex items-center justify-center gap-1.5 border border-neutral-700"
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <Check className="w-3.5 h-3.5" />
                       OK / Apply Line Deformation
                     </button>
 
@@ -898,9 +885,7 @@ export default function TwitchToolPanel({
               {/* NEW SHAPE MODE */}
               {twitchState.activeMode === 'new_shape' && (
                 <div className="space-y-2.5 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-800 text-[10px]">
-                  <p className="text-neutral-300 leading-relaxed">
-                    Draw directly on canvas with your pen/mouse to create a new stroke or sub-shape. It will be added as an independent sub-part without joining existing open strokes!
-                  </p>
+                  
                 </div>
               )}
             </div>

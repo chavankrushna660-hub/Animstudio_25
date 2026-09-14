@@ -448,7 +448,7 @@ export default function CustomColorPicker({
         shouldUseModal ? (
           /* Dedicated In-App Modal Backdrop (Eliminates all browser native pickers) */
           <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-150"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/65 animate-in fade-in duration-150"
             onClick={() => setIsOpen(false)}
           >
             <div

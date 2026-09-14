@@ -228,6 +228,7 @@ export interface VectorObject {
   keepAttachedTo?: string | null; // Drawing ID to keep permanently attached
   attachedGroupId?: string; // Group ID for permanent relative move linking
   lassoFills?: { localLassoPoints: Point[], color: string, origBounds?: { minX: number, minY: number, width: number, height: number }, origPoints?: Point[] }[]; // Sub-areas colored via lasso tool
+  fillEraseStrokes?: { points: Point[], radius: number }[]; // Custom areas where fill was erased by dragging
   zIndex?: number; // Sorting order within the layer
   z?: number; // 3D Layer Depth value (lower = background, higher = foreground)
   shadow?: ObjectShadow;

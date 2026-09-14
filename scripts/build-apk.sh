@@ -337,7 +337,7 @@ EOF
 aapt package -f -m -J /build-apk/gen -M /build-apk/AndroidManifest.xml -S /build-apk/res -I /usr/lib/android-sdk/platforms/android-23/android.jar
 
 # 9. Compile Java sources
-javac -source 1.8 -target 1.8 -d /build-apk/obj -cp /usr/lib/android-sdk/platforms/android-23/android.jar /build-apk/gen/com/animstudio/app/R.java /build-apk/src/com/animstudio/app/MainActivity.java
+javac -proc:none -source 1.8 -target 1.8 -d /build-apk/obj -cp /usr/lib/android-sdk/platforms/android-23/android.jar /build-apk/gen/com/animstudio/app/R.java /build-apk/src/com/animstudio/app/MainActivity.java
 
 # 10. Convert bytecode to Dalvik DEX
 /usr/bin/dalvik-exchange --dex --output=/build-apk/bin/classes.dex /build-apk/obj

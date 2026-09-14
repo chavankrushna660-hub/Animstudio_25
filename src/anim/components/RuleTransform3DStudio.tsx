@@ -6,7 +6,6 @@ import {
   Eye, 
   EyeOff, 
   Layers, 
-  Sparkles, 
   RefreshCw, 
   ShieldCheck, 
   Compass, 
@@ -15,7 +14,6 @@ import {
   SlidersHorizontal,
   ChevronDown,
   ChevronRight,
-  Zap,
   RotateCcw
 } from 'lucide-react';
 import { VectorObject, Rule3DState, Rule3DDetectedPart } from '../types';
@@ -42,9 +40,6 @@ export const RuleTransform3DStudio: React.FC<RuleTransform3DStudioProps> = ({
         <span className="text-xs font-black uppercase tracking-wider text-neutral-300 block">
           2D-to-3D Rule Transform Engine
         </span>
-        <p className="text-[10px] text-neutral-500 font-bold leading-normal">
-          Select any 2D drawing or character on canvas to activate the Stroke Memory 3D virtual engine.
-        </p>
       </div>
     );
   }
@@ -203,23 +198,19 @@ export const RuleTransform3DStudio: React.FC<RuleTransform3DStudioProps> = ({
               : 'bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-700'
           }`}
         >
-          <Zap className={`w-3 h-3 ${isEngineActive ? 'text-amber-300 fill-amber-300' : ''}`} />
+          <Rotate3d className="w-3 h-3" />
           {isEngineActive ? '3D Active' : 'Enable 3D'}
         </button>
       </div>
 
       {!isEngineActive ? (
         <div className="space-y-3 pt-1">
-          <p className="text-[10px] text-neutral-300 leading-relaxed font-medium">
-            Strictly treats this 2D drawing as a 3D object using rule-based depth inference, stroke memory, and real-time perspective calculation.
-          </p>
-
           <button
             type="button"
             onClick={() => handleInitEngine('ellipsoid')}
             className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-[11px] font-black rounded-xl shadow-lg shadow-indigo-900/40 transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
           >
-            <Sparkles className="w-4 h-4 text-amber-300" />
+            <Box className="w-4 h-4 text-amber-300" />
             Scan Strokes & Build 3D Soul
           </button>
         </div>
@@ -344,7 +335,7 @@ export const RuleTransform3DStudio: React.FC<RuleTransform3DStudioProps> = ({
           {/* Quick 3D Angle Turn Presets */}
           <div className="space-y-1.5">
             <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400 block">
-              ⚡ Instant 3D Angle Presets
+               Instant 3D Angle Presets
             </span>
             <div className="grid grid-cols-4 gap-1">
               {[

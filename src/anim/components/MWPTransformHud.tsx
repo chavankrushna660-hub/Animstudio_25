@@ -6,7 +6,6 @@ import {
   Move, 
   Minimize2, 
   ChevronDown, 
-  Sparkles, 
   X, 
   Sliders, 
   Layers, 
@@ -128,7 +127,7 @@ export default function MWPTransformHud({
     <div 
       id="mwp-transform-hud-box"
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
-      className="fixed z-50 w-72 bg-neutral-900/95 backdrop-blur-md border-2 border-amber-500/80 rounded-xl shadow-2xl text-white select-none overflow-visible animate-in fade-in zoom-in-95 duration-150"
+      className="fixed z-50 w-72 bg-neutral-900/95 border-2 border-amber-500/80 rounded-xl shadow-2xl text-white select-none overflow-visible animate-in fade-in zoom-in-95 duration-150"
     >
       {/* Draggable Header Bar */}
       <div 
@@ -242,7 +241,7 @@ export default function MWPTransformHud({
           <div>
             <div className="flex items-center justify-between text-[11px] mb-1">
               <span className="font-semibold text-emerald-400 flex items-center gap-1">
-                <span>➕ Increment</span>
+                <span> Increment</span>
               </span>
               <span className="font-mono font-bold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-800/50">
                 +{incrementValue} {currentPropObj.unit}
@@ -263,7 +262,7 @@ export default function MWPTransformHud({
           <div>
             <div className="flex items-center justify-between text-[11px] mb-1">
               <span className="font-semibold text-rose-400 flex items-center gap-1">
-                <span>➖ Decrement</span>
+                <span> Decrement</span>
               </span>
               <span className="font-mono font-bold text-rose-300 bg-rose-950/60 px-1.5 py-0.2 rounded border border-rose-800/50">
                 -{decrementValue} {currentPropObj.unit}
@@ -313,17 +312,6 @@ export default function MWPTransformHud({
             })}
           </div>
         </div>
-
-        {/* Help Tip */}
-        <p className="text-[10px] text-neutral-400 leading-tight">
-          {pointCount >= 3 
-            ? '✨ Inner bounded area in placed points strictly transforms; outside boundary stays frozen.'
-            : pointCount === 2 
-            ? '✨ Axis line between 2 points transforms strictly without distortion.' 
-            : pointCount === 1 
-            ? '✨ Local radius around placed point transforms strictly.' 
-            : '👈 Click anywhere on stroke or PNG to place transform boundary points.'}
-        </p>
       </div>
     </div>
   );
